@@ -1,7 +1,7 @@
 from src.models.poisson import Poisson
 from src.models.requin import Requin
 from src.models.grille import Grille
-from src.models.mer import Mer
+from models.mer2 import Mer
 
 ma_grille = Grille(10,5)
 ma_mer = Mer(ma_grille)
