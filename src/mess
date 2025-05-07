@@ -1,0 +1,16 @@
+mon erreur est :
+python3 mer.py  
+  File "/home/r-mi/simplon/Anice/wa-tor/src/mer.py", line 17
+    ma_grille = Grille(10,5)
+    ^
+IndentationError: expected an indented block after function definition on line 16
+
+
+
+mon projet est organisé comme :
+ 
+      ├── models/
+      │   ├── grille.py
+      │   ├── poisson.py
+      │   └── requin.py
+      └── mer.py
