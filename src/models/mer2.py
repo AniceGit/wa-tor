@@ -1,6 +1,6 @@
-from models.poisson import Poisson
-from models.requin import Requin
-from models.grille import Grille
+from scr.models.poisson import Poisson
+from scr.models.requin import Requin
+from scr.models.grille import Grille
 
 class Mer:
     def __init__(self, grille):

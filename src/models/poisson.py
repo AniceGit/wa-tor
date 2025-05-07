@@ -1,5 +1,5 @@
 import random
-from grille import Grille
+from models.grille import Grille
 
 class Poisson:
     def __init__(self, tps_gestation, abscisse, ordonnee):
