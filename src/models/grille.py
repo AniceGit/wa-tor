@@ -1,5 +1,5 @@
-from models.poisson import Poisson
-from models.requin import Requin
+from src.models.poisson import Poisson
+from src.models.requin import Requin
 
 class Grille:
     def __init__(self,largeur,longueur):
@@ -8,6 +8,7 @@ class Grille:
         self.longeur = longueur
     
     def __str__(self):
+
         sortie = ''
         for ligne in self.grille:
             for case in ligne:
@@ -19,7 +20,6 @@ class Grille:
                     sortie += '\033[43m🐟\033[0m'
             sortie += "\n"
         return sortie
-    
-    def __repr__(self):
+
+    def repr(self):
         return str(self)
-    

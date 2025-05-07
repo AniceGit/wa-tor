@@ -23,6 +23,3 @@ class Mer:
         ma_mer.ajout_poisson(p1)
         ma_mer.ajout_poisson(r1)
         print(ma_mer)   
-
-if __name__ == "___main__":
-     main()
