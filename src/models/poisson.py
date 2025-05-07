@@ -1,5 +1,3 @@
-from src.models.grille import Grille
-
 class Poisson:
     def __init__(self, tps_gestation, abscisse, ordonnee):
         self.tps_gestation = tps_gestation
