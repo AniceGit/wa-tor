@@ -3,7 +3,7 @@ from src.models.requin import Requin
 
 class Grille:
     def init(self,largeur,longueur):
-        self.grille = [[None for in range(largeur)] for in range(longueur)]
+        self.grille = [[None for _ in range(largeur)] for _ in range(longueur)]
         self.largeur = largeur
         self.longueur = longueur
 
