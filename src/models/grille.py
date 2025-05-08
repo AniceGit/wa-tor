@@ -1,11 +1,11 @@
-from src.models.poisson import Poisson
-from src.models.requin import Requin
+from models.poisson import Poisson
+from models.requin import Requin
 
 class Grille:
     def __init__(self,largeur,longueur):
-        self.grille = [[None for _ in range(largeur)] for _ in range(longueur)]
+        self.tableau = [[None for _ in range(largeur)] for _ in range(longueur)]
         self.largeur = largeur
-        self.longeur = longueur
+        self.longueur = longueur
     
     def __str__(self):
 

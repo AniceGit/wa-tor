@@ -1,4 +1,4 @@
-from src.models.poisson import Poisson
+from models.poisson import Poisson
 
 class Requin(Poisson):
 
