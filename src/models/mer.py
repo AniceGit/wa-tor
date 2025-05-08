@@ -26,12 +26,15 @@ class Mer:
                 elif isinstance(case, Requin):
                     sortie += '\033[41m🦈\033[0m'
                 elif isinstance(case, Poisson):
-                    sortie += '\033[43m🐟\033[0m'
+                    sortie += '\033[42m🐟\033[0m'
             sortie += "\n"
         return sortie 
 
     def __repr__(self):
         return str(self)
+    
+
+
 
 def test():
     ma_grille = Grille(10,5)
@@ -42,7 +45,13 @@ def test():
     r1 = Requin(**dico_r1)
     ma_mer.ajout_poisson(1, 1, p1)
     ma_mer.ajout_poisson(2, 2, r1)
-    print(ma_mer)   
+    
+    print(ma_mer)
+
+    v1 = ma_grille.voisins(1, 1)
+    v2 = ma_grille.voisins(2, 2)
+    print(v1)
+    print(v2)   
 
 if __name__ == "__main__":
     test()
