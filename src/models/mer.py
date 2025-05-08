@@ -17,6 +17,22 @@ class Mer:
         else:
                 print(f"Case ({abscisse},{ordonnee}) déjà occupée.")
 
+    def __str__(self):
+        sortie = ""
+        for ligne in self.grille.tableau:
+            for case in ligne:
+                if case is None:
+                    sortie += '\033[44m🌊\033[0m'
+                elif isinstance(case, Requin):
+                    sortie += '\033[41m🦈\033[0m'
+                elif isinstance(case, Poisson):
+                    sortie += '\033[43m🐟\033[0m'
+            sortie += "\n"
+        return sortie 
+
+    def __repr__(self):
+        return str(self)
+
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
