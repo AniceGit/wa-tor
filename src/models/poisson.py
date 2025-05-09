@@ -8,6 +8,9 @@ class Poisson:
     def deplacer(self, x, y):
         self.abscisse = x
         self.ordonnee = y
+        self.tps_gestation -= 1
+        #return self.reproduire()
+        
 
     #on vérifie s'il y a un poisson donné est voisin de requin
     #et si oui on retourne True afin de pouvoir requin.manger() dans Mer
@@ -29,7 +32,7 @@ class Poisson:
     #retourne le poisson et on utilise les coordonnées de l'objet poisson dans Mer pour 
     #ajouter un poisson dans les coordonnées précédente du poisson après l'avoir déplacé
     def reproduire(self):
-        if self.tps_gestation <= 0:
+        if self.tps_gestation < 0:
             self.tps_gestation = 5
-            return self 
+            return self.abscisse, self.ordonnee 
         return None   
