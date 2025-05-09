@@ -34,12 +34,13 @@ class Mer:
                     
                     for index, case in enumerate(voisins):
                         if case and not isinstance(case, Requin):
-                            print(f"case : {case}")
+                            #print(f"case : {case}")
                             poisson.manger()
                             if poisson.reproduire():
                                 nouveau_ne = Requin(5, abscisse, ordonnee, 5)
                                 a_accouche = True
                             poisson.deplacer(case.abscisse, case.ordonnee)
+                            print("HEEEEEYYYYYY", [p for p in self.liste_poissons])
                             self.liste_poissons.remove(case)
                             a_mange = True
                             a_bouge = True
@@ -47,7 +48,7 @@ class Mer:
                     if not a_mange:
                         for case in voisins:
                             if case == None:
-                                print(f"cas du none, poisson : {poisson} case : {case} ")
+                                #print(f"cas du none, poisson : {poisson} case : {case} ")
                                 if poisson.reproduire():
                                     nouveau_ne = Requin(5, abscisse, ordonnee)
                                     
@@ -55,10 +56,11 @@ class Mer:
                                 poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
                                 a_bouge = True
                     if a_bouge:
-                        print(f"A bougé poisson : {poisson}case 2{case}")
+                        #print(f"A bougé poisson : {poisson}case 2{case}")
                         if a_accouche:
                             #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                             self.grille.tableau[abscisse][ordonnee] = None
+                            self.liste_poissons.append(nouveau_ne)
                             self.ajout_poisson(nouveau_ne)
                             
                         else:
@@ -72,7 +74,6 @@ class Mer:
                     if self.grille.tableau[poisson.abscisse][poisson.ordonnee +1] == None:
                         if poisson.reproduire():
                             nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            
                             a_accouche = True
 
                         poisson.deplacer(abscisse, poisson.ordonnee +1)
@@ -80,24 +81,25 @@ class Mer:
                     elif self.grille.tableau[poisson.abscisse][poisson.ordonnee -1] == None:
                         if poisson.reproduire():
                             nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            
                             a_accouche = True
+
                         poisson.deplacer(abscisse, poisson.ordonnee -1)
                     elif self.grille.tableau[poisson.abscisse +1][poisson.ordonnee] == None:
                         if poisson.reproduire():
                             nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            
                             a_accouche = True
+
                         poisson.deplacer(poisson.abscisse +1 , ordonnee)
                     elif self.grille.tableau[poisson.abscisse -1][poisson.ordonnee] == None:
                         if poisson.reproduire():
                             nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            
                             a_accouche = True
+
                         poisson.deplacer(poisson.abscisse -1, ordonnee)
                     if a_accouche:
                         #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                         self.grille.tableau[abscisse][ordonnee] = None
+                        self.liste_poissons.append(nouveau_ne)
                         self.ajout_poisson(nouveau_ne)
                     else:    
                         self.grille.tableau[abscisse][ordonnee] = None
@@ -131,7 +133,7 @@ class Mer:
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
-    dico_p1 = {'tps_gestation' : 5, 'abscisse' : 1, 'ordonnee' : 2}
+    dico_p1 = {'tps_gestation' : -1, 'abscisse' : 1, 'ordonnee' : 2}
     dico_r1 = {'tps_gestation' : -1, 'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
     dico_p2 = {'tps_gestation' : 5, 'abscisse' : 3, 'ordonnee' : 2}
     p1 = Poisson(**dico_p1)
