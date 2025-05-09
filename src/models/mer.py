@@ -1,3 +1,4 @@
+from typing import List
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
@@ -7,15 +8,67 @@ from models.grille import Grille
 
 class Mer:
     def __init__(self, grille):
-        self.grille = grille
+        self.grille: Grille = grille
+        self.liste_poissons:List[Poisson] = []
 
-    def ajout_poisson(self, abscisse, ordonnee, un_poisson):
+    def ajout_poisson(self, un_poisson):
         abscisse = un_poisson.abscisse % self.grille.largeur
         ordonnee = un_poisson.ordonnee % self.grille.longueur
         if self.grille.tableau[abscisse][ordonnee] is None:
             self.grille.tableau[abscisse][ordonnee] = un_poisson
+            self.liste_poissons.append(un_poisson)
         else:
                 print(f"Case ({abscisse},{ordonnee}) déjà occupée.")
+
+    def deplacer_tous(self):
+        for poisson in self.liste_poissons:
+            if poisson:
+                print(f"poisson en actuel : {poisson}")
+                if isinstance(poisson, Requin):
+                    abscisse = poisson.abscisse
+                    ordonnee = poisson.ordonnee
+                    voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
+                    a_mange = False
+                    a_bouge = False
+                    for index, case in enumerate(voisins):
+                        if case and not isinstance(case, Requin):
+                            print(f"case : {case}")
+                            poisson.manger()
+                            poisson.abscisse = case.abscisse
+                            poisson.ordonnee = case.ordonnee
+                            self.liste_poissons.remove(case)
+                            a_mange = True
+                            a_bouge = True
+
+                    if not a_mange:
+                        for case in voisins:
+                            if case == None:
+                                print(f"cas du none, poisson : {poisson} case : {case} ")
+                                poisson.abscisse = coordonnees_voisins[index][0]
+                                poisson.ordonnee = coordonnees_voisins[index][1]
+                                a_bouge = True
+                    if a_bouge:
+                        print(f"A bougé poisson : {poisson}case 2{case}")
+                        self.grille.tableau[abscisse][ordonnee] = None
+                        self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+                else:
+                    abscisse = poisson.abscisse
+                    ordonnee = poisson.ordonnee
+                    if self.grille.tableau[poisson.abscisse][poisson.ordonnee +1] == None:
+                        poisson.deplacer(abscisse, poisson.ordonnee +1)
+                    elif self.grille.tableau[poisson.abscisse][poisson.ordonnee -1] == None:
+                        poisson.deplacer(abscisse, poisson.ordonnee -1)
+                    elif self.grille.tableau[poisson.abscisse +1][poisson.ordonnee] == None:
+                        poisson.deplacer(poisson.abscisse +1 , ordonnee)
+                    elif self.grille.tableau[poisson.abscisse -1][poisson.ordonnee] == None:
+                        poisson.deplacer(poisson.abscisse -1, ordonnee)
+                    self.grille.tableau[abscisse][ordonnee] = None
+                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+                
+
+                
+
+
 
     def __str__(self):
         sortie = ""
@@ -32,6 +85,7 @@ class Mer:
 
     def __repr__(self):
         return str(self)
+
     
 
 
@@ -39,19 +93,27 @@ class Mer:
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
-    dico_p1 = {'tps_gestation' : 3, 'abscisse' : 1, 'ordonnee' : 1}
+    dico_p1 = {'tps_gestation' : 3, 'abscisse' : 1, 'ordonnee' : 2}
     dico_r1 = {'tps_gestation' : 5, 'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
+    dico_p2 = {'tps_gestation' : 3, 'abscisse' : 3, 'ordonnee' : 2}
     p1 = Poisson(**dico_p1)
+    p2 = Poisson(**dico_p2)
     r1 = Requin(**dico_r1)
-    ma_mer.ajout_poisson(1, 1, p1)
-    ma_mer.ajout_poisson(2, 2, r1)
+    ma_mer.ajout_poisson(p1)
+    ma_mer.ajout_poisson(r1)
+    ma_mer.ajout_poisson(p2)
     
     print(ma_mer)
 
-    v1 = ma_grille.voisins(1, 1)
+    v1 = ma_grille.voisins(1, 2)
     v2 = ma_grille.voisins(2, 2)
-    print(v1)
-    print(v2)   
+
+    print("*****************")
+
+    ma_mer.deplacer_tous()
+
+    print(ma_mer)
+
 
 if __name__ == "__main__":
     test()
