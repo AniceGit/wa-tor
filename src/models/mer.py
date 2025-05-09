@@ -18,7 +18,7 @@ class Mer:
             self.grille.tableau[abscisse][ordonnee] = un_poisson
             self.liste_poissons.append(un_poisson)
         else:
-                print(f"Case ({abscisse},{ordonnee}) déjà occupée.")
+            print(f"Case ({abscisse},{ordonnee}) déjà occupée.")
 
     def deplacer_tous(self):
         for poisson in self.liste_poissons:
@@ -58,6 +58,7 @@ class Mer:
                         print(f"A bougé poisson : {poisson}case 2{case}")
                         if a_accouche:
                             #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
+                            self.grille.tableau[abscisse][ordonnee] = None
                             self.ajout_poisson(nouveau_ne)
                             
                         else:
@@ -96,9 +97,10 @@ class Mer:
                         poisson.deplacer(poisson.abscisse -1, ordonnee)
                     if a_accouche:
                         #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
+                        self.grille.tableau[abscisse][ordonnee] = None
                         self.ajout_poisson(nouveau_ne)
                     else:    
-                         self.grille.tableau[abscisse][ordonnee] = None
+                        self.grille.tableau[abscisse][ordonnee] = None
                     self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
                 
 
