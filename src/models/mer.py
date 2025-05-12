@@ -43,14 +43,10 @@ class Mer:
     def deplacer_tous(self):
         liste_nouveaux_nes = []
         for poisson in self.liste_poissons:
-            #print(poisson.est_vivant)
             if poisson.est_vivant:
-                # print(f"poisson en actuel : {poisson}")
-
                 abscisse = poisson.abscisse
                 ordonnee = poisson.ordonnee
                 voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
-                #print("voisins :", [v for v in voisins])
 
                 if isinstance(poisson, Requin):
                     
@@ -85,13 +81,11 @@ class Mer:
 
                     if poisson.a_bouge:
                         if poisson.a_accouche:
-                            #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                             self.ajout_poisson(nouveau_ne)
                         else:
                             self.grille.tableau[abscisse][ordonnee] = None
                             
                     if poisson.est_vivant:
-                        #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
                         self.ajout_poisson(poisson)
                 else:
 
@@ -101,17 +95,15 @@ class Mer:
                                 nouveau_ne = Poisson(abscisse, ordonnee)
                                 liste_nouveaux_nes.append(nouveau_ne)
                                 poisson.a_accouche = True
-                            #print("premier voisin vide du thon : ", coordonnees_voisins[index][0]," ",coordonnees_voisins[index][1])
+
                             poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
 
 
                     if poisson.a_accouche:
-                        #self.grille.tableau[ordonnee][abscisse] = nouveau_ne
                         self.ajout_poisson(nouveau_ne)
                     else:    
                         self.grille.tableau[abscisse][ordonnee] = None
 
-                    #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
                     self.ajout_poisson(poisson)
                 
             poisson.a_accouche = False
@@ -125,10 +117,6 @@ class Mer:
         for poisson in self.liste_poissons:
             if not poisson.est_vivant:
                 self.liste_poissons.remove(poisson)
-
-        #On ajoute les poissons à la grille (Update de grille)
-        # for poisson in self.liste_poissons :
-        #     self.ajout_poisson(poisson)
 
         
                 
@@ -158,16 +146,6 @@ def test():
     largeur = 25
     ma_grille = Grille(longueur,largeur)
     ma_mer = Mer(ma_grille)
-    # dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
-    # dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
-    # dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2}
-    # p1 = Poisson(**dico_p1)
-    # p2 = Poisson(**dico_p2)
-    # r1 = Requin(**dico_r1)
-    # ma_mer.ajout_poisson(p1)
-    # ma_mer.ajout_poisson(r1)
-    # ma_mer.ajout_poisson(p2)
-    # ma_mer.liste_poissons = [p1,p2,r1]
 
     ma_mer.ajout_poissons_liste(100,40)
     
