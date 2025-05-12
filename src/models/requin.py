@@ -2,7 +2,7 @@ from models.poisson import Poisson
 
 class Requin(Poisson):
 
-    def __init__(self,abscisse, ordonnee, energie):
+    def __init__(self,abscisse, ordonnee):
         super().__init__(abscisse, ordonnee)
         self.energie_initiale = 5
         self.energie = self.energie_initiale
