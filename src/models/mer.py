@@ -43,9 +43,9 @@ class Mer:
     def deplacer_tous(self):
         liste_nouveaux_nes = []
         for poisson in self.liste_poissons:
-            print(poisson.est_vivant)
+            #print(poisson.est_vivant)
             if poisson.est_vivant:
-                print(f"poisson en actuel : {poisson}")
+                # print(f"poisson en actuel : {poisson}")
 
                 abscisse = poisson.abscisse
                 ordonnee = poisson.ordonnee
@@ -59,7 +59,7 @@ class Mer:
                             poisson.manger()
 
                             if poisson.reproduire():
-                                nouveau_ne = Requin(5, abscisse, ordonnee, 5)
+                                nouveau_ne = Requin(abscisse, ordonnee)
                                 liste_nouveaux_nes.append(nouveau_ne)
                                 poisson.a_accouche = True
 
@@ -72,7 +72,7 @@ class Mer:
                         for index, case in enumerate(voisins):
                             if case == None:
                                 if poisson.reproduire():
-                                    nouveau_ne = Requin(5, abscisse, ordonnee)
+                                    nouveau_ne = Requin(abscisse, ordonnee)
                                     liste_nouveaux_nes.append(nouveau_ne)
                                     poisson.a_accouche = True
 
@@ -98,10 +98,10 @@ class Mer:
                     for index, case in enumerate(voisins):
                         if case == None :
                             if poisson.reproduire():
-                                nouveau_ne = Poisson(5, abscisse, ordonnee)
-                                liste_nouveaux_nes(nouveau_ne)
+                                nouveau_ne = Poisson(abscisse, ordonnee)
+                                liste_nouveaux_nes.append(nouveau_ne)
                                 poisson.a_accouche = True
-                            print("premier voisin vide du thon : ", coordonnees_voisins[index][0]," ",coordonnees_voisins[index][1])
+                            #print("premier voisin vide du thon : ", coordonnees_voisins[index][0]," ",coordonnees_voisins[index][1])
                             poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
 
 
@@ -158,7 +158,7 @@ def test():
     ma_mer = Mer(ma_grille)
     # dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
     # dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
-    # dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
+    # dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2}
     # p1 = Poisson(**dico_p1)
     # p2 = Poisson(**dico_p2)
     # r1 = Requin(**dico_r1)
@@ -167,14 +167,14 @@ def test():
     # ma_mer.ajout_poisson(p2)
     # ma_mer.liste_poissons = [p1,p2,r1]
 
-    ma_mer.ajout_poissons_liste(4,2)
+    ma_mer.ajout_poissons_liste(5,5)
     
     print(ma_mer)
     
     print("*****************")
-
-    ma_mer.deplacer_tous()
-    print(ma_mer)
+    for _ in range(100):
+        ma_mer.deplacer_tous()
+        print(ma_mer)
 
 
 if __name__ == "__main__":
