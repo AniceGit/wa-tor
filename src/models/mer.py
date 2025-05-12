@@ -167,7 +167,7 @@ def test():
     # ma_mer.ajout_poisson(p2)
     # ma_mer.liste_poissons = [p1,p2,r1]
 
-    ma_mer.ajout_poissons_liste(5,5)
+    ma_mer.ajout_poissons_liste(10,5)
     
     print(ma_mer)
     
