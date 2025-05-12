@@ -10,8 +10,8 @@ class Mer:
         self.liste_poissons:List[Poisson] = []
 
     def ajout_poisson(self, un_poisson:Poisson):
-        abscisse = un_poisson.abscisse % self.grille.largeur
-        ordonnee = un_poisson.ordonnee % self.grille.longueur
+        abscisse = un_poisson.abscisse % self.grille.longueur
+        ordonnee = un_poisson.ordonnee % self.grille.largeur
 
         self.grille.tableau[abscisse][ordonnee] = un_poisson
 
@@ -81,14 +81,14 @@ class Mer:
 
                                 if poisson.energie < 0:
                                     poisson.est_vivant = False
-                                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+                                    self.grille.tableau[poisson.ordonnee][poisson.abscisse] = None
 
                     if poisson.a_bouge:
                         if poisson.a_accouche:
                             #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                             self.ajout_poisson(nouveau_ne)
                         else:
-                            self.grille.tableau[abscisse][ordonnee] = None
+                            self.grille.tableau[ordonnee][abscisse] = None
                             
                     if poisson.est_vivant:
                         #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
@@ -106,10 +106,10 @@ class Mer:
 
 
                     if poisson.a_accouche:
-                        #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
+                        #self.grille.tableau[ordonnee][abscisse] = nouveau_ne
                         self.ajout_poisson(nouveau_ne)
                     else:    
-                        self.grille.tableau[abscisse][ordonnee] = None
+                        self.grille.tableau[ordonnee][abscisse] = None
 
                     #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
                     self.ajout_poisson(poisson)
