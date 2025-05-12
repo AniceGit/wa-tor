@@ -154,8 +154,8 @@ class Mer:
 
 
 def test():
-    longueur = 50
-    largeur = 100
+    longueur = 80
+    largeur = 25
     ma_grille = Grille(longueur,largeur)
     ma_mer = Mer(ma_grille)
     # dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
@@ -169,12 +169,12 @@ def test():
     # ma_mer.ajout_poisson(p2)
     # ma_mer.liste_poissons = [p1,p2,r1]
 
-    ma_mer.ajout_poissons_liste(50,10)
+    ma_mer.ajout_poissons_liste(100,40)
     
     print(ma_mer)
     
     print("*****************")
-    for _ in range(20):
+    for _ in range(200):
         ma_mer.deplacer_tous()
         print(ma_mer)
 
