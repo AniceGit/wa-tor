@@ -17,12 +17,14 @@ class Mer:
     def deplacer_tous(self):
         liste_nouveaux_nes = []
         for poisson in self.liste_poissons:
+            print(poisson.est_vivant)
             if poisson.est_vivant:
                 print(f"poisson en actuel : {poisson}")
 
                 abscisse = poisson.abscisse
                 ordonnee = poisson.ordonnee
                 voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
+                #print("voisins :", [v for v in voisins])
 
                 if isinstance(poisson, Requin):
                     
@@ -128,15 +130,16 @@ class Mer:
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
-    dico_p1 = {'tps_gestation' : 5, 'abscisse' : 1, 'ordonnee' : 2}
-    dico_p2 = {'tps_gestation' : 5, 'abscisse' : 3, 'ordonnee' : 2}
-    dico_r1 = {'tps_gestation' : 5, 'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
+    dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
+    dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
+    dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
     p1 = Poisson(**dico_p1)
     p2 = Poisson(**dico_p2)
     r1 = Requin(**dico_r1)
     ma_mer.ajout_poisson(p1)
     ma_mer.ajout_poisson(r1)
     ma_mer.ajout_poisson(p2)
+    ma_mer.liste_poissons = [p1,p2,r1]
     
     print(ma_mer)
 
