@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple, Union
 from models.poisson import Poisson
 from models.requin import Requin
 
@@ -9,7 +9,7 @@ class Grille:
         self.longueur = longueur
     
     
-    def voisins(self, abscisse, ordonnee)->List[Poisson]:
+    def voisins(self, abscisse, ordonnee)->Tuple[List[Union[Poisson, Requin, None]], List[Tuple[int, int]]]:
         directions = [(-1, 0), (1, 0), (0,-1), (0, 1)]
         coordonnee_voisins = []
         for dx, dy in directions:
