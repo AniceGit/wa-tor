@@ -2,113 +2,108 @@ from typing import List
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
-#from src.models.poisson import Poisson
-#from src.models.requin import Requin
-#from src.models.grille import Grille
 
 class Mer:
     def __init__(self, grille):
         self.grille: Grille = grille
         self.liste_poissons:List[Poisson] = []
 
-    def ajout_poisson(self, un_poisson):
+    def ajout_poisson(self, un_poisson:Poisson):
         abscisse = un_poisson.abscisse % self.grille.largeur
         ordonnee = un_poisson.ordonnee % self.grille.longueur
-        if self.grille.tableau[abscisse][ordonnee] is None:
-            self.grille.tableau[abscisse][ordonnee] = un_poisson
-            self.liste_poissons.append(un_poisson)
-        else:
-            print(f"Case ({abscisse},{ordonnee}) déjà occupée.")
+
+        self.grille.tableau[abscisse][ordonnee] = un_poisson
 
     def deplacer_tous(self):
+        liste_nouveaux_nes = []
         for poisson in self.liste_poissons:
-            if poisson:
+            if poisson.est_vivant:
                 print(f"poisson en actuel : {poisson}")
-                a_accouche = False
+
+                abscisse = poisson.abscisse
+                ordonnee = poisson.ordonnee
+                voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
+
                 if isinstance(poisson, Requin):
-                    abscisse = poisson.abscisse
-                    ordonnee = poisson.ordonnee
-                    voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
-                    a_mange = False
-                    a_bouge = False
                     
                     for index, case in enumerate(voisins):
                         if case and not isinstance(case, Requin):
-                            #print(f"case : {case}")
                             poisson.manger()
+
                             if poisson.reproduire():
                                 nouveau_ne = Requin(5, abscisse, ordonnee, 5)
-                                a_accouche = True
-                            poisson.deplacer(case.abscisse, case.ordonnee)
-                            print("HEEEEEYYYYYY", [p for p in self.liste_poissons])
-                            self.liste_poissons.remove(case)
-                            a_mange = True
-                            a_bouge = True
+                                liste_nouveaux_nes.append(nouveau_ne)
+                                poisson.a_accouche = True
 
-                    if not a_mange:
-                        for case in voisins:
+                            poisson.deplacer(case.abscisse, case.ordonnee)
+                            case.est_vivant = False
+                            poisson.a_mange = True 
+                            poisson.a_bouge = True
+
+                    if not poisson.a_mange:
+                        for index, case in enumerate(voisins):
                             if case == None:
-                                #print(f"cas du none, poisson : {poisson} case : {case} ")
                                 if poisson.reproduire():
                                     nouveau_ne = Requin(5, abscisse, ordonnee)
-                                    
-                                    a_accouche = True
+                                    liste_nouveaux_nes.append(nouveau_ne)
+                                    poisson.a_accouche = True
+
                                 poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
-                                a_bouge = True
-                    if a_bouge:
-                        #print(f"A bougé poisson : {poisson}case 2{case}")
-                        if a_accouche:
+                                poisson.a_bouge = True
+
+                                if poisson.energie < 0:
+                                    poisson.est_vivant = False
+                                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+
+                    if poisson.a_bouge:
+                        if poisson.a_accouche:
                             #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
-                            self.grille.tableau[abscisse][ordonnee] = None
-                            self.liste_poissons.append(nouveau_ne)
                             self.ajout_poisson(nouveau_ne)
-                            
                         else:
                             self.grille.tableau[abscisse][ordonnee] = None
-
-
-                        self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+                            
+                    if poisson.est_vivant:
+                        #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+                        self.ajout_poisson(poisson)
                 else:
-                    abscisse = poisson.abscisse
-                    ordonnee = poisson.ordonnee
-                    if self.grille.tableau[poisson.abscisse][poisson.ordonnee +1] == None:
-                        if poisson.reproduire():
-                            nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            a_accouche = True
 
-                        poisson.deplacer(abscisse, poisson.ordonnee +1)
-                        
-                    elif self.grille.tableau[poisson.abscisse][poisson.ordonnee -1] == None:
-                        if poisson.reproduire():
-                            nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            a_accouche = True
+                    for index, case in enumerate(voisins):
+                        if case == None :
+                            if poisson.reproduire():
+                                nouveau_ne = Poisson(5, abscisse, ordonnee)
+                                liste_nouveaux_nes(nouveau_ne)
+                                poisson.a_accouche = True
+                            print("premier voisin vide du thon : ", coordonnees_voisins[index][0]," ",coordonnees_voisins[index][1])
+                            poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
 
-                        poisson.deplacer(abscisse, poisson.ordonnee -1)
-                    elif self.grille.tableau[poisson.abscisse +1][poisson.ordonnee] == None:
-                        if poisson.reproduire():
-                            nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            a_accouche = True
 
-                        poisson.deplacer(poisson.abscisse +1 , ordonnee)
-                    elif self.grille.tableau[poisson.abscisse -1][poisson.ordonnee] == None:
-                        if poisson.reproduire():
-                            nouveau_ne = Poisson(5, abscisse, ordonnee)
-                            a_accouche = True
-
-                        poisson.deplacer(poisson.abscisse -1, ordonnee)
-                    if a_accouche:
+                    if poisson.a_accouche:
                         #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
-                        self.grille.tableau[abscisse][ordonnee] = None
-                        self.liste_poissons.append(nouveau_ne)
                         self.ajout_poisson(nouveau_ne)
                     else:    
                         self.grille.tableau[abscisse][ordonnee] = None
-                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+
+                    #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
+                    self.ajout_poisson(poisson)
                 
+            poisson.a_accouche = False
+            poisson.a_bouge = False
+            poisson.a_mange = False
+        
+        #On ajoute les nouveaux nés à la liste de poissons
+        self.liste_poissons.extend(liste_nouveaux_nes)
 
+        #On supprime les poissons morts
+        for poisson in self.liste_poissons:
+            if not poisson.est_vivant:
+                self.liste_poissons.remove(poisson)
+
+        #On ajoute les poissons à la grille (Update de grille)
+        # for poisson in self.liste_poissons :
+        #     self.ajout_poisson(poisson)
+
+        
                 
-
-
 
     def __str__(self):
         sortie = ""
@@ -133,9 +128,9 @@ class Mer:
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
-    dico_p1 = {'tps_gestation' : -1, 'abscisse' : 1, 'ordonnee' : 2}
-    dico_r1 = {'tps_gestation' : -1, 'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
+    dico_p1 = {'tps_gestation' : 5, 'abscisse' : 1, 'ordonnee' : 2}
     dico_p2 = {'tps_gestation' : 5, 'abscisse' : 3, 'ordonnee' : 2}
+    dico_r1 = {'tps_gestation' : 5, 'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
     p1 = Poisson(**dico_p1)
     p2 = Poisson(**dico_p2)
     r1 = Requin(**dico_r1)
@@ -147,11 +142,11 @@ def test():
 
     v1 = ma_grille.voisins(1, 2)
     v2 = ma_grille.voisins(2, 2)
-
+    print(p1.abscisse, " ", p1.ordonnee)
     print("*****************")
 
     ma_mer.deplacer_tous()
-
+    print(p1.abscisse, " ", p1.ordonnee)
     print(ma_mer)
 
 
