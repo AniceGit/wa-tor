@@ -1,3 +1,3 @@
 from models import mer
-
-mer.test()
+print("salut de main")
+mer.testKNN()
