@@ -81,14 +81,14 @@ class Mer:
 
                                 if poisson.energie < 0:
                                     poisson.est_vivant = False
-                                    self.grille.tableau[poisson.ordonnee][poisson.abscisse] = None
+                                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
 
                     if poisson.a_bouge:
                         if poisson.a_accouche:
                             #self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                             self.ajout_poisson(nouveau_ne)
                         else:
-                            self.grille.tableau[ordonnee][abscisse] = None
+                            self.grille.tableau[abscisse][ordonnee] = None
                             
                     if poisson.est_vivant:
                         #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
@@ -109,7 +109,7 @@ class Mer:
                         #self.grille.tableau[ordonnee][abscisse] = nouveau_ne
                         self.ajout_poisson(nouveau_ne)
                     else:    
-                        self.grille.tableau[ordonnee][abscisse] = None
+                        self.grille.tableau[abscisse][ordonnee] = None
 
                     #self.grille.tableau[poisson.abscisse][poisson.ordonnee] = poisson
                     self.ajout_poisson(poisson)
@@ -154,7 +154,9 @@ class Mer:
 
 
 def test():
-    ma_grille = Grille(10,5)
+    longueur = 50
+    largeur = 100
+    ma_grille = Grille(longueur,largeur)
     ma_mer = Mer(ma_grille)
     # dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
     # dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
@@ -167,12 +169,12 @@ def test():
     # ma_mer.ajout_poisson(p2)
     # ma_mer.liste_poissons = [p1,p2,r1]
 
-    ma_mer.ajout_poissons_liste(10,5)
+    ma_mer.ajout_poissons_liste(50,10)
     
     print(ma_mer)
     
     print("*****************")
-    for _ in range(100):
+    for _ in range(20):
         ma_mer.deplacer_tous()
         print(ma_mer)
 

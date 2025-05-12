@@ -1,6 +1,6 @@
 class Poisson:
-    def __init__(self, abscisse, ordonnee):
-        self.tps_gestation_initial = 8
+    def __init__(self, abscisse, ordonnee,tps_gestation_initial=8):
+        self.tps_gestation_initial = tps_gestation_initial
         self.tps_gestation = self.tps_gestation_initial
         self.abscisse = abscisse
         self.ordonnee = ordonnee

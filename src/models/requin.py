@@ -2,10 +2,11 @@ from models.poisson import Poisson
 
 class Requin(Poisson):
 
-    def __init__(self,abscisse, ordonnee):
-        super().__init__(abscisse, ordonnee)
+    def __init__(self,abscisse, ordonnee, tps_gestation =15):
+        super().__init__(abscisse, ordonnee,tps_gestation)
         self.energie_initiale = 3
         self.energie = self.energie_initiale
+        
 
     def manger(self):
         self.energie += self.energie_initiale
