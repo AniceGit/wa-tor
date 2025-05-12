@@ -4,7 +4,7 @@ class Requin(Poisson):
 
     def __init__(self,abscisse, ordonnee):
         super().__init__(abscisse, ordonnee)
-        self.energie_initiale = 5
+        self.energie_initiale = 3
         self.energie = self.energie_initiale
 
     def manger(self):
