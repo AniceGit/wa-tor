@@ -51,9 +51,11 @@ class Mer:
                 voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
 
                 if isinstance(poisson, Requin):
+                    cible = self.KNN_requin(poisson)
+                    poisson_cible = cible[1]
                     
                     for index, case in enumerate(voisins):
-                        if case and not isinstance(case, Requin):
+                        if case == poisson_cible:
                             poisson.manger()
 
                             if poisson.reproduire():
@@ -62,24 +64,64 @@ class Mer:
                                 poisson.a_accouche = True
 
                             poisson.deplacer(case.abscisse, case.ordonnee)
-                            case.est_vivant = False
+                            poisson_cible.est_vivant = False
                             poisson.a_mange = True 
                             poisson.a_bouge = True
+                    
 
                     if not poisson.a_mange:
-                        for index, case in enumerate(voisins):
-                            if case == None:
-                                if poisson.reproduire():
-                                    nouveau_ne = Requin(abscisse, ordonnee)
-                                    liste_nouveaux_nes.append(nouveau_ne)
-                                    poisson.a_accouche = True
+                        delta_abscisse = coordonnees_voisins[index][0] - abscisse
+                        delta_ordonnee = coordonnees_voisins[index][1] - ordonnee
+                        abs_delta_abscisse = abs(delta_abscisse)
+                        abs_delta_ordonnee = abs(delta_ordonnee)
+                        if abs(delta_abscisse)*delta_abscisse < 0:
+                            delta_a = -1
+                        else: 
+                            delta_a = 1
 
-                                poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
+                        if abs(delta_ordonnee)*delta_ordonnee < 0:
+                            delta_o = -1
+                        else: 
+                            delta_o = 1
+                        if abs_delta_abscisse > abs_delta_ordonnee and self.grille.tableau[poisson.abscisse + delta_a][poisson.ordonnee] == None:
+                            if poisson.reproduire():
+                                nouveau_ne = Requin(abscisse, ordonnee)
+                                liste_nouveaux_nes.append(nouveau_ne)
+                                poisson.a_accouche = True
+
+                                poisson.deplacer(poisson.abscisse + delta_a, poisson.ordonnee)
                                 poisson.a_bouge = True
+                            if poisson.energie < 0:
+                                poisson.est_vivant = False
+                                self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
 
-                                if poisson.energie < 0:
-                                    poisson.est_vivant = False
-                                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+                        else:
+                            if poisson.reproduire():
+                                nouveau_ne = Requin(abscisse, ordonnee)
+                                liste_nouveaux_nes.append(nouveau_ne)
+                                poisson.a_accouche = True
+
+                                poisson.deplacer(poisson.abscisse , poisson.ordonnee + delta_o)
+                                poisson.a_bouge = True
+                            if poisson.energie < 0:
+                                poisson.est_vivant = False
+                                self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+
+
+                            
+                        # for index, case in enumerate(voisins):
+                        #     if case == None:
+                        #         if poisson.reproduire():
+                        #             nouveau_ne = Requin(abscisse, ordonnee)
+                        #             liste_nouveaux_nes.append(nouveau_ne)
+                        #             poisson.a_accouche = True
+
+                        #         poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
+                        #         poisson.a_bouge = True
+
+                        #         if poisson.energie < 0:
+                        #             poisson.est_vivant = False
+                        #             self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
 
                     if poisson.a_bouge:
                         if poisson.a_accouche:
@@ -153,12 +195,11 @@ class Mer:
 
 
     def KNN_requin(self, requin: Requin, k: int = 1) -> List[Tuple[float, Poisson]]:
-        def distance(x: int, y: int) -> float:
-            return sqrt(x**2 + y**2)
+        
 
         liste_distances: List[Tuple[float, Poisson]] = []
         for poisson in self.liste_poissons:
-            if not isinstance(poisson, Requin):
+            if not isinstance(poisson, Requin) and poisson.est_vivant:
                 dist = distance(
                     requin.abscisse - poisson.abscisse,
                     requin.ordonnee - poisson.ordonnee
@@ -168,6 +209,9 @@ class Mer:
         # Trie la liste selon la distance et retourne les k plus proches
         # Ici k=1
         return sorted(liste_distances, key=lambda x: x[0])[0]
+
+def distance(x: int, y: int) -> float:
+            return sqrt(x**2 + y**2)
 
 
 def testKNN():
@@ -197,24 +241,24 @@ def test():
     print(ma_mer)
     
     print("*****************")
-    for _ in range(200):
+    for _ in range(5):
         ma_mer.deplacer_tous()
         print(ma_mer)
 
 if __name__ == "__main__":
-    print("Salut de mer")
-    testKNN()
+    test()
+#     print("Salut de mer")
+#     testKNN()
 
 
                 
 
 
 
-if __name__ == "__main__":
-    print("Salut de mer")
-    l = testKNN()
-    if l:
-        print(l)
-        print("TOTO")
-        print(l[0])
-
+# if __name__ == "__main__":
+#     print("Salut de mer")
+#     l = testKNN()
+#     if l:
+#         print(l)
+#         print("TOTO")
+#         print(l[0])
