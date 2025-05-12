@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Union
+import random
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
@@ -13,6 +14,31 @@ class Mer:
         ordonnee = un_poisson.ordonnee % self.grille.longueur
 
         self.grille.tableau[abscisse][ordonnee] = un_poisson
+
+    def ajout_poissons_liste(self, nb_poissons: int, nb_requins: int) -> List[Union[Poisson, Requin]]:
+        liste_poissons: List[Union[Poisson, Requin]] = []
+        total = nb_poissons + nb_requins
+        largeur = self.grille.largeur
+        longueur = self.grille.longueur
+
+        cases_disponibles = [(x, y) for x in range(longueur) for y in range(largeur)]
+        random.shuffle(cases_disponibles)
+        cases_choisies = cases_disponibles[:total]
+
+        for i in range(nb_poissons):
+            x, y = cases_choisies[i]
+            poisson = Poisson(x, y)
+            self.grille.tableau[x][y] = poisson
+            liste_poissons.append(poisson)
+
+        for i in range(nb_poissons, total):
+            x, y = cases_choisies[i]
+            requin = Requin(x, y)
+            self.grille.tableau[x][y] = requin
+            liste_poissons.append(requin)
+
+        self.liste_poissons = liste_poissons
+        return liste_poissons
 
     def deplacer_tous(self):
         liste_nouveaux_nes = []
@@ -130,26 +156,24 @@ class Mer:
 def test():
     ma_grille = Grille(10,5)
     ma_mer = Mer(ma_grille)
-    dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
-    dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
-    dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
-    p1 = Poisson(**dico_p1)
-    p2 = Poisson(**dico_p2)
-    r1 = Requin(**dico_r1)
-    ma_mer.ajout_poisson(p1)
-    ma_mer.ajout_poisson(r1)
-    ma_mer.ajout_poisson(p2)
-    ma_mer.liste_poissons = [p1,p2,r1]
+    # dico_p1 = {'abscisse' : 1, 'ordonnee' : 2}
+    # dico_p2 = {'abscisse' : 3, 'ordonnee' : 2}
+    # dico_r1 = {'abscisse' : 2 , 'ordonnee' : 2, 'energie' : 10}
+    # p1 = Poisson(**dico_p1)
+    # p2 = Poisson(**dico_p2)
+    # r1 = Requin(**dico_r1)
+    # ma_mer.ajout_poisson(p1)
+    # ma_mer.ajout_poisson(r1)
+    # ma_mer.ajout_poisson(p2)
+    # ma_mer.liste_poissons = [p1,p2,r1]
+
+    ma_mer.ajout_poissons_liste(4,2)
     
     print(ma_mer)
-
-    v1 = ma_grille.voisins(1, 2)
-    v2 = ma_grille.voisins(2, 2)
-    print(p1.abscisse, " ", p1.ordonnee)
+    
     print("*****************")
 
     ma_mer.deplacer_tous()
-    print(p1.abscisse, " ", p1.ordonnee)
     print(ma_mer)
 
 
