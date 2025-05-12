@@ -141,7 +141,7 @@ class Mer:
 
 
 
-def test():
+def start():
     longueur = 80
     largeur = 25
     ma_grille = Grille(longueur,largeur)
@@ -152,11 +152,11 @@ def test():
     print(ma_mer)
     
     print("*****************")
-    for _ in range(200):
+    for _ in range(300):
         ma_mer.deplacer_tous()
         print(ma_mer)
 
 
 if __name__ == "__main__":
-    test()
+    start()
 

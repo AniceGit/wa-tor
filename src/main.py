@@ -1,3 +1,3 @@
 from models import mer
 
-mer.test()
+mer.start()
