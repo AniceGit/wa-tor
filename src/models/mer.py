@@ -1,5 +1,7 @@
 from typing import List, Union
 import random
+import os
+import time
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
@@ -118,12 +120,36 @@ class Mer:
             if not poisson.est_vivant:
                 self.liste_poissons.remove(poisson)
 
-        
-                
-
-    def __str__(self):
-        sortie = ""
+    def compter_etats(self):
+        nb_poissons = 0
+        nb_requins = 0
         for ligne in self.grille.tableau:
+            for case in ligne:
+                if isinstance(case, Requin):
+                    nb_requins += 1
+                elif isinstance(case, Poisson):
+                    nb_poissons += 1
+
+        if nb_poissons > nb_requins:
+            poissons_str = '\033[93m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # jaune
+            requins_str = '\033[91m🦈 Requins : {}\033[0m'.format(nb_requins)     # rouge
+        elif nb_requins > nb_poissons:
+            poissons_str = '\033[91m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # rouge
+            requins_str = '\033[93m🦈 Requins : {}\033[0m'.format(nb_requins)     # jaune
+        else:
+            poissons_str = '\033[93m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # égalité : les deux jaunes
+            requins_str = '\033[93m🦈 Requins : {}\033[0m'.format(nb_requins)
+
+        print(f"{poissons_str}   {requins_str}\n")
+        
+     
+    def __str__(self):
+        largeur_case = 2
+        nb_colonnes = len(self.grille.tableau[0])
+        bordure_longueur = nb_colonnes * largeur_case
+        sortie = "╔" + "═" * bordure_longueur + "╗\n"
+        for ligne in self.grille.tableau:
+            sortie += "║"
             for case in ligne:
                 if case is None:
                     sortie += '\033[44m🌊\033[0m'
@@ -131,17 +157,16 @@ class Mer:
                     sortie += '\033[41m🦈\033[0m'
                 elif isinstance(case, Poisson):
                     sortie += '\033[42m🐟\033[0m'
-            sortie += "\n"
-        return sortie 
+            sortie += "║\n"
+        sortie += "╚" + "═" * bordure_longueur + "╝"
+        return sortie
+
 
     def __repr__(self):
         return str(self)
 
-    
 
-
-
-def start():
+def start(iterations = 300, intervalle=0.2):
     longueur = 80
     largeur = 25
     ma_grille = Grille(longueur,largeur)
@@ -149,14 +174,15 @@ def start():
 
     ma_mer.ajout_poissons_liste(100,40)
     
-    print(ma_mer)
-    
-    print("*****************")
-    for _ in range(300):
-        ma_mer.deplacer_tous()
+    for tour in range(iterations):
+        os.system('cls' if os.name == 'nt' else 'clear') 
+        print(f"🌍 Simulation Wa-Tor — Tour {tour + 1}\n")
+        ma_mer.compter_etats()
         print(ma_mer)
-
+        ma_mer.deplacer_tous()
+        time.sleep(intervalle)
 
 if __name__ == "__main__":
     start()
+
 
