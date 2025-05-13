@@ -337,8 +337,8 @@ def start(iterations = 300, intervalle=0.2):
     ma_mer.ajout_poissons_liste(100,40)
     
     for tour in range(iterations):
-        # os.system('cls' if os.name == 'nt' else 'clear') 
-        print("\033[H\033[J", end="")
+        os.system('cls' if os.name == 'nt' else 'clear') 
+        #print("\033[H\033[J", end="")
         print(f"🌍 Simulation Wa-Tor — Tour {tour + 1}\n")
         ma_mer.compter_etats()
         print(ma_mer)
