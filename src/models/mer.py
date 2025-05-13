@@ -68,16 +68,16 @@ class Mer:
                     dy = (1 if dy > 0 else -1 if dy < 0 else 0)
 
                     # Mouvement prioritaire horizontal
-                    new_x, new_y = abscisse + dx, ordonnee
-                    if dx != 0 and self.grille.tableau[new_x][new_y] is None:
+                    nouveau_x, nouveau_y = abscisse + dx, ordonnee
+                    if dx != 0 and self.grille.tableau[nouveau_x][nouveau_y] is None:
                         pass
                     elif dy != 0 and self.grille.tableau[abscisse][ordonnee + dy] is None:
-                        new_x, new_y = abscisse, ordonnee + dy
+                        nouveau_x, nouveau_y = abscisse, ordonnee + dy
                     else:
-                        new_x, new_y = abscisse, ordonnee  # Pas de déplacement possible
+                        nouveau_x, nouveau_y = abscisse, ordonnee  # Pas de déplacement possible
 
                     # Vérifie si on atteint la cible
-                    if (new_x, new_y) == (cible.abscisse, cible.ordonnee):
+                    if (nouveau_x, nouveau_y) == (cible.abscisse, cible.ordonnee):
                         cible.est_vivant = False
                         poisson.manger()
                         poisson.a_mange = True
@@ -89,7 +89,7 @@ class Mer:
                         poisson.a_accouche = True
 
                     # Déplacement et perte d’énergie
-                    poisson.deplacer(new_x, new_y)
+                    poisson.deplacer(nouveau_x, nouveau_y)
                     poisson.energie -= 1
                     poisson.a_bouge = True
 
@@ -109,14 +109,14 @@ class Mer:
             else:  # Poisson simple
                 for i, case in enumerate(voisins):
                     if case is None:
-                        new_x, new_y = coord_voisins[i]
+                        nouveau_x, nouveau_y = coord_voisins[i]
 
                         if poisson.reproduire():
                             nouveau_ne = Poisson(abscisse, ordonnee)
                             liste_nouveaux_nes.append(nouveau_ne)
                             poisson.a_accouche = True
 
-                        poisson.deplacer(new_x, new_y)
+                        poisson.deplacer(nouveau_x, nouveau_y)
                         self.grille.tableau[abscisse][ordonnee] = None
                         break  # Un seul déplacement
 
@@ -175,16 +175,16 @@ class Mer:
                             dy = -1
 
                         # Essaye d’avancer vers la cible (priorité à dx)
-                        new_x, new_y = x + dx, y
-                        if dx != 0 and self.grille.tableau[new_x, new_y] == None:
+                        nouveau_x, nouveau_y = x + dx, y
+                        if dx != 0 and self.grille.tableau[nouveau_x, nouveau_y] == None:
                             pass
                         elif dy != 0 and self.grille.tableau[x, y + dy] == None:
-                            new_x, new_y = x, y + dy
+                            nouveau_x, nouveau_y = x, y + dy
                         else:
-                            new_x, new_y = x, y  # bloqué
+                            nouveau_x, nouveau_y = x, y  # bloqué
 
                         # Si on atteint la cible
-                        if new_x == poisson_cible.abscisse and new_y == poisson_cible.ordonnee:
+                        if nouveau_x == poisson_cible.abscisse and nouveau_y == poisson_cible.ordonnee:
                             poisson_cible.est_vivant = False
                             poisson.manger()
                             poisson.a_mange = True
@@ -195,7 +195,7 @@ class Mer:
                             liste_nouveaux_nes.append(nouveau_ne)
                             poisson.a_accouche = True
 
-                        poisson.deplacer(new_x, new_y)
+                        poisson.deplacer(nouveau_x, nouveau_y)
                         poisson.a_bouge = True
 
                         # Vérifie l’énergie
@@ -221,8 +221,8 @@ class Mer:
                                 liste_nouveaux_nes.append(nouveau_ne)
                                 poisson.a_accouche = True
 
-                            new_x, new_y = coordonnees_voisins[index]
-                            poisson.deplacer(new_x, new_y)
+                            nouveau_x, nouveau_y = coordonnees_voisins[index]
+                            poisson.deplacer(nouveau_x, nouveau_y)
                             break  # déplacement fait
 
                     if poisson.a_accouche:
@@ -244,127 +244,7 @@ class Mer:
 
 
 
-    def deplacer_tous2(self):
-        liste_nouveaux_nes = []
-        for poisson in self.liste_poissons:
-            if poisson.est_vivant:
-                abscisse = poisson.abscisse
-                ordonnee = poisson.ordonnee
-                voisins, coordonnees_voisins = self.grille.voisins(poisson.abscisse,poisson.ordonnee)
 
-                if isinstance(poisson, Requin):
-                    cible = self.KNN_requin(poisson)
-                    poisson_cible = cible[1]
-                    
-                    for index, case in enumerate(voisins):
-                        if case and case == poisson_cible:
-                            poisson.manger()
-
-                            if poisson.reproduire():
-                                nouveau_ne = Requin(abscisse, ordonnee)
-                                liste_nouveaux_nes.append(nouveau_ne)
-                                poisson.a_accouche = True
-
-                            poisson.deplacer(case.abscisse, case.ordonnee)
-                            poisson_cible.est_vivant = False
-                            poisson.a_mange = True 
-                            poisson.a_bouge = True
-                    
-
-                    if not poisson.a_mange:
-                        delta_abscisse = coordonnees_voisins[index][0] - abscisse
-                        delta_ordonnee = coordonnees_voisins[index][1] - ordonnee
-                        abs_delta_abscisse = abs(delta_abscisse)
-                        abs_delta_ordonnee = abs(delta_ordonnee)
-                        if abs(delta_abscisse)*delta_abscisse < 0:
-                            delta_a = -1
-                        else: 
-                            delta_a = 1
-
-                        if abs(delta_ordonnee)*delta_ordonnee < 0:
-                            delta_o = -1
-                        else: 
-                            delta_o = 1
-                        if abs_delta_abscisse > abs_delta_ordonnee and self.grille.tableau[poisson.abscisse + delta_a][poisson.ordonnee] == None:
-                            if poisson.reproduire():
-                                nouveau_ne = Requin(abscisse, ordonnee)
-                                liste_nouveaux_nes.append(nouveau_ne)
-                                poisson.a_accouche = True
-
-                                poisson.deplacer(poisson.abscisse + delta_a, poisson.ordonnee)
-                                poisson.a_bouge = True
-                            if poisson.energie < 0:
-                                poisson.est_vivant = False
-                                self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
-
-                        else:
-                            if poisson.reproduire():
-                                nouveau_ne = Requin(abscisse, ordonnee)
-                                liste_nouveaux_nes.append(nouveau_ne)
-                                poisson.a_accouche = True
-
-                                poisson.deplacer(poisson.abscisse , poisson.ordonnee + delta_o)
-                                poisson.a_bouge = True
-                            if poisson.energie < 0:
-                                poisson.est_vivant = False
-                                self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
-
-
-                            
-                        # for index, case in enumerate(voisins):
-                        #     if case == None:
-                        #         if poisson.reproduire():
-                        #             nouveau_ne = Requin(abscisse, ordonnee)
-                        #             liste_nouveaux_nes.append(nouveau_ne)
-                        #             poisson.a_accouche = True
-
-                        #         poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
-                        #         poisson.a_bouge = True
-
-                        #         if poisson.energie < 0:
-                        #             poisson.est_vivant = False
-                        #             self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
-
-                    if poisson.a_bouge:
-                        if poisson.a_accouche:
-                            self.ajout_poisson(nouveau_ne)
-                        else:
-                            self.grille.tableau[abscisse][ordonnee] = None
-                            
-                    if poisson.est_vivant:
-                        self.ajout_poisson(poisson)
-                else:
-
-                    for index, case in enumerate(voisins):
-                        if case == None :
-                            if poisson.reproduire():
-                                nouveau_ne = Poisson(abscisse, ordonnee)
-                                liste_nouveaux_nes.append(nouveau_ne)
-                                poisson.a_accouche = True
-
-                            poisson.deplacer(coordonnees_voisins[index][0], coordonnees_voisins[index][1])
-
-
-                    if poisson.a_accouche:
-                        self.ajout_poisson(nouveau_ne)
-                    else:    
-                        self.grille.tableau[abscisse][ordonnee] = None
-
-                    self.ajout_poisson(poisson)
-                
-            poisson.a_accouche = False
-            poisson.a_bouge = False
-            poisson.a_mange = False
-        
-        #On ajoute les nouveaux nés à la liste de poissons
-        self.liste_poissons.extend(liste_nouveaux_nes)
-
-        #On supprime les poissons morts
-        for poisson in self.liste_poissons:
-            if not poisson.est_vivant:
-                self.liste_poissons.remove(poisson)
-
-        
                 
 
     def __str__(self):
@@ -383,17 +263,6 @@ class Mer:
     def __repr__(self):
         return str(self)
 
-
-
-
-
-
-    # def KNN_requin(self, requin: Requin) -> List[Tuple[float, Poisson]]:
-    #     liste_distances: List[Tuple[float, Poisson]] = []
-    #     for poisson in self.liste_poissons:
-    #         if not isinstance(poisson, Requin):
-    #             liste_distances.append(self.distance(requin.abscisse-poisson.abscisse, requin.ordonnee-poisson.ordonnee), poisson)
-    #     return sorted(liste_distances)
 
 
     def KNN_requin(self, requin: Requin, k: int = 1) -> List[Tuple[float, Poisson]]:
@@ -417,16 +286,6 @@ def distance_manhattan(x: int, y: int, x_cible: int, y_cible: int, largeur: int,
 
 
 
-
-
-def distance_manhattan0(x: int, y: int, x_cible : int, y_cible : int) -> float:
-            return abs(x - x_cible) + abs(y - y_cible)
-
-
-
-
-def distance2(x: int, y: int) -> float:
-            return sqrt(x**2 + y**2)
 
 
 def testKNN():
