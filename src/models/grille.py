@@ -17,3 +17,13 @@ class Grille:
             coordonnee_voisins.append((nx, ny))
 
         return (list(map(lambda t: self.tableau[t[0]][t[1]] , coordonnee_voisins)), coordonnee_voisins)
+
+    def est_libre(self, x: int, y: int) -> bool:
+        """
+        Retourne vrai si la case de coordonnées(x modulo longueur, y modulo largeur ) est à None
+        On utilise des modulos pour éviter les problèmes de débordement du tableau             
+        """
+
+        x = x % self.longueur
+        y = y % self.largeur
+        return self.tableau[x][y] is None
