@@ -2,6 +2,9 @@ from typing import List, Union, Tuple
 from math import sqrt
 
 import random
+import os
+import time
+
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
@@ -262,6 +265,53 @@ class Mer:
 
 
 
+
+
+    def compter_etats(self):
+        nb_poissons = 0
+        nb_requins = 0
+        for ligne in self.grille.tableau:
+            for case in ligne:
+                if isinstance(case, Requin):
+                    nb_requins += 1
+                elif isinstance(case, Poisson):
+                    nb_poissons += 1
+
+        if nb_poissons > nb_requins:
+            poissons_str = '\033[93m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # jaune
+            requins_str = '\033[91m🦈 Requins : {}\033[0m'.format(nb_requins)     # rouge
+        elif nb_requins > nb_poissons:
+            poissons_str = '\033[91m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # rouge
+            requins_str = '\033[93m🦈 Requins : {}\033[0m'.format(nb_requins)     # jaune
+        else:
+            poissons_str = '\033[93m🐟 Poissons : {}\033[0m'.format(nb_poissons)  # égalité : les deux jaunes
+            requins_str = '\033[93m🦈 Requins : {}\033[0m'.format(nb_requins)
+
+        print(f"{poissons_str}   {requins_str}\n")
+        
+     
+    def __str__(self):
+        largeur_case = 2
+        nb_colonnes = len(self.grille.tableau[0])
+        bordure_longueur = nb_colonnes * largeur_case
+        sortie = "╔" + "═" * bordure_longueur + "╗\n"
+        for ligne in self.grille.tableau:
+            sortie += "║"
+            for case in ligne:
+                if case is None:
+                    sortie += '\033[44m🌊\033[0m'
+                elif isinstance(case, Requin):
+                    sortie += '\033[41m🦈\033[0m'
+                elif isinstance(case, Poisson):
+                    sortie += '\033[42m🐟\033[0m'
+            sortie += "║\n"
+        sortie += "╚" + "═" * bordure_longueur + "╝"
+        return sortie
+
+
+    def __repr__(self):
+        return str(self)
+
 def testKNN():
     longueur = 80
     largeur = 25
@@ -277,6 +327,26 @@ def testKNN():
             print(f"Le poisson le  plus proches de {poisson} est :")
             print(f"  - {plus_proche[1]}, il est à une distance de {plus_proche[0]:.2f}")
             print(f"  - ses coordonnées sont : {plus_proche[1].abscisse} {plus_proche[1].ordonnee}")
+
+def start(iterations = 300, intervalle=0.2):
+    longueur = 80
+    largeur = 25
+    ma_grille = Grille(longueur,largeur)
+    ma_mer = Mer(ma_grille)
+
+    ma_mer.ajout_poissons_liste(100,40)
+    
+    for tour in range(iterations):
+        # os.system('cls' if os.name == 'nt' else 'clear') 
+        print("\033[H\033[J", end="")
+        print(f"🌍 Simulation Wa-Tor — Tour {tour + 1}\n")
+        ma_mer.compter_etats()
+        print(ma_mer)
+        ma_mer.deplacer_tous()
+        time.sleep(intervalle)
+
+
+
 
 def test():
     longueur = 40
@@ -294,7 +364,8 @@ def test():
         print(ma_mer)
 
 if __name__ == "__main__":
-    test()
+    #test()
+    start()
 #     print("Salut de mer")
 #     testKNN()
 
