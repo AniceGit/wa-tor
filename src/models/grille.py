@@ -17,3 +17,9 @@ class Grille:
             coordonnee_voisins.append((nx, ny))
 
         return (list(map(lambda t: self.tableau[t[0]][t[1]] , coordonnee_voisins)), coordonnee_voisins)
+    
+        def est_libre(self, x: int, y: int) -> bool:
+        # Gestion du débordement avec modulo (torique)
+            x = x % self.longueur
+            y = y % self.largeur
+            return self.tableau[x][y] is None
