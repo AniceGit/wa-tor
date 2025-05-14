@@ -4,11 +4,10 @@ from models.requin import Requin
 from models.rocher import Rocher
 
 class Grille:
-    def __init__(self,largeur : int, longueur : int) :
-        self.tableau : List[List[Requin, Poisson, Rocher, None]] = [[None for _ in range(largeur)] for _ in range(longueur)]
+    def __init__(self, largeur: int, longueur: int):
+        self.tableau: List[List[Union[Requin, Poisson, Rocher, None]]] = [[None for _ in range(largeur)] for _ in range(longueur)]
         self.largeur = largeur
         self.longueur = longueur
-    
     
     def voisins(self, abscisse, ordonnee)->Tuple[List[Union[Poisson, Requin, Rocher, None]], List[Tuple[int, int]]]:
         directions = [(-1, 0), (1, 0), (0,-1), (0, 1)]

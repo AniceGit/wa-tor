@@ -288,37 +288,19 @@ class Mer:
 
 
 #region knn requin
-    def KNN_requin(self, requin: Requin, k: int = 1, champ_de_vision: int = 1) -> List[Tuple[float, Poisson]]:
-        """
-        Trouve les k poissons les plus proches du requin en utilisant la distance de Manhattan.
-        Prend en compte la nature toroïdale du monde (bords connectés).
-        
-        Args:
-            requin: Le requin qui cherche une proie
-            k: Nombre de plus proches voisins à renvoyer (par défaut 1)
-            
-        Returns:
-            Liste de tuples (distance, poisson) triés par distance croissante
-        """
+    def KNN_requin(self, requin: Requin, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Poisson]]:
         liste_distances = []
         
-        for poisson in self.liste_requins:
-            # Ne considère que les poissons vivants (pas les requins)
-            if not isinstance(poisson, Requin) and poisson.est_vivant:
-                # Calcule la distance de Manhattan en tenant compte du monde toroïdal
+        for poisson in self.liste_poissons:  # Chercher parmi les poissons
+            if poisson.est_vivant:
                 dist = self.distance_manhattan(
                     requin.abscisse, requin.ordonnee, 
                     poisson.abscisse, poisson.ordonnee
                 )
-                if dist > champ_de_vision:
-                    continue
-                else :
+                if dist <= champ_de_vision:
                     liste_distances.append((dist, poisson))
         
-        # Trie par distance et renvoie les k plus proches poissons
         liste_distances.sort(key=lambda x: x[0])
-        
-        # Renvoie soit le nombre demandé de voisins, soit tous si moins existent
         return liste_distances[:k] if liste_distances else []
 
 #region distance manhattan
@@ -348,37 +330,19 @@ class Mer:
         
         return dx + dy
     
-    def KNN_poisson(self, poisson: Poisson, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Poisson]]:
-        """
-        Trouve les k requins les plus proches du poisson en utilisant la distance de Manhattan.
-        Prend en compte la nature toroïdale du monde (bords connectés).
-        
-        Args:
-            requin: Le poisson qui cherche un prédateur
-            k: Nombre de plus proches voisins à renvoyer (par défaut 1)
-            
-        Returns:
-            Liste de tuples (distance, poisson) triés par distance croissante
-        """
+    def KNN_poisson(self, poisson: Poisson, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Requin]]:
         liste_distances = []
         
-        for requin in self.liste_poissons:
-            # Ne considère que les poissons vivants (pas les requins)
-            if isinstance(requin, Requin) and requin.est_vivant:
-                # Calcule la distance de Manhattan en tenant compte du monde toroïdal
+        for requin in self.liste_requins:  # Chercher parmi les requins, pas les poissons
+            if requin.est_vivant:
                 dist = self.distance_manhattan(
                     requin.abscisse, requin.ordonnee, 
                     poisson.abscisse, poisson.ordonnee
                 )
-                if dist > champ_de_vision:
-                    continue
-                else :
-                    liste_distances.append((dist, poisson))
+                if dist <= champ_de_vision:
+                    liste_distances.append((dist, requin))
         
-        # Trie par distance et renvoie les k plus proches poissons
         liste_distances.sort(key=lambda x: x[0])
-        
-        # Renvoie soit le nombre demandé de voisins, soit tous si moins existent
         return liste_distances[:k] if liste_distances else []
 
     #region distance manhattan
