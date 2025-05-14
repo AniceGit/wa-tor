@@ -28,7 +28,7 @@ class Mer:
 
     # Fonction d'ajout de poissons aléatoirement à l'intilisation
     def ajout_poissons_requin_rochers_dans_liste(
-        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 100):
+        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 200):
         total = nb_poissons + nb_requins + nb_rochers
         largeur = self.grille.largeur
         longueur = self.grille.longueur
