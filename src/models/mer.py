@@ -8,12 +8,16 @@ import math
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
+from models.rocher import Rocher
 
 
 class Mer:
     def __init__(self, grille):
         self.grille: Grille = grille
         self.liste_poissons: List[Poisson] = []
+        self.liste_requins: List[Requin] = []
+        self.liste_rochers: List[Rocher] = []
+        self.liste_creatures: List[Poisson, Requin] = []
 #region Ajouts poissons
     # Fonction d'ajout d'un poisson à la grille
     def ajout_poisson(self, un_poisson: Poisson):
@@ -23,11 +27,9 @@ class Mer:
         self.grille.tableau[abscisse][ordonnee] = un_poisson
 
     # Fonction d'ajout de poissons aléatoirement à l'intilisation
-    def ajout_poissons_liste(
-        self, nb_poissons: int, nb_requins: int
-    ) -> List[Union[Poisson, Requin]]:
-        liste_poissons: List[Union[Poisson, Requin]] = []
-        total = nb_poissons + nb_requins
+    def ajout_poissons_requin_rochers_dans_liste(
+        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 100):
+        total = nb_poissons + nb_requins + nb_rochers
         largeur = self.grille.largeur
         longueur = self.grille.longueur
 
@@ -39,16 +41,22 @@ class Mer:
             x, y = cases_choisies[i]
             poisson = Poisson(x, y)
             self.grille.tableau[x][y] = poisson
-            liste_poissons.append(poisson)
+            self.liste_poissons.append(poisson)
 
-        for i in range(nb_poissons, total):
+        for i in range(nb_poissons, nb_poissons + nb_requins):
             x, y = cases_choisies[i]
             requin = Requin(x, y)
             self.grille.tableau[x][y] = requin
-            liste_poissons.append(requin)
+            self.liste_requins.append(requin)
 
-        self.liste_poissons = liste_poissons
-        return liste_poissons
+        for i in range(nb_poissons + nb_requins, nb_poissons + nb_requins + nb_rochers):
+            x, y = cases_choisies[i]
+            rocher = Rocher(x, y)
+            self.grille.tableau[x][y] = rocher
+            self.liste_rochers.append(rocher)
+
+        
+
 
 #region deplacer tous basique
     # # FOnction principale de déplacement des poissons dans la mer et la grille
@@ -141,9 +149,16 @@ class Mer:
 
 #region deplacer tous knn
     def deplacer_tous(self):
-        liste_nouveaux_nes : List[Poisson, Requin] = []
+        #liste_nouveaux_nes : List[Poisson, Requin] = []
+        liste_nouveaux_nes_poissons : List[Poisson] = []
+        liste_nouveaux_nes_requins : List[Requin] = []
+        liste_creatures : List[Poisson, Requin] = []
+        liste_creatures.extend(self.liste_poissons)
+        liste_creatures.extend(self.liste_requins)
+        random.shuffle(liste_creatures)
 
-        for creature in list(self.liste_poissons):  # copie pour éviter itération sur liste modifiée
+         
+        for creature in liste_creatures[:]:   # copie pour éviter itération sur liste modifiée
             if not creature.est_vivant:
                 continue
 
@@ -211,7 +226,7 @@ class Mer:
                 if nouveau_ne:
                     bx, by = x, y
                     coordonnee_parent = Requin(bx, by)
-                    liste_nouveaux_nes.append(coordonnee_parent)
+                    liste_nouveaux_nes_requins.append(coordonnee_parent)
                     self.grille.tableau[bx][by] = coordonnee_parent
 
                 # mort de faim
@@ -259,12 +274,16 @@ class Mer:
                 if nouveau_ne:
                     bx, by = x, y
                     coordonnee_parent = Poisson(bx, by)
-                    liste_nouveaux_nes.append(coordonnee_parent)
+                    liste_nouveaux_nes_poissons.append(coordonnee_parent)
                     self.grille.tableau[bx][by] = coordonnee_parent
 
         # fin de boucle : on ajoute les nouveau-nés et on supprime les morts
-        self.liste_poissons.extend(liste_nouveaux_nes)
+        
         self.liste_poissons = [p for p in self.liste_poissons if p.est_vivant]
+        self.liste_poissons.extend(liste_nouveaux_nes_poissons)
+
+        self.liste_requins = [p for p in self.liste_requins if p.est_vivant]
+        self.liste_requins.extend(liste_nouveaux_nes_requins)
 
 
 
@@ -283,7 +302,7 @@ class Mer:
         """
         liste_distances = []
         
-        for poisson in self.liste_poissons:
+        for poisson in self.liste_requins:
             # Ne considère que les poissons vivants (pas les requins)
             if not isinstance(poisson, Requin) and poisson.est_vivant:
                 # Calcule la distance de Manhattan en tenant compte du monde toroïdal
@@ -465,7 +484,7 @@ def start(iterations=300, intervalle=0.2):
     ma_grille = Grille(longueur, largeur)
     ma_mer = Mer(ma_grille)
 
-    ma_mer.ajout_poissons_liste(100,100)
+    ma_mer.ajout_poissons_requin_rochers_dans_liste(100,100)
     for tour in range(iterations):
         os.system("cls" if os.name == "nt" else "clear")
         # print("\033[H\033[J", end="")
@@ -554,14 +573,14 @@ def start_pygame(iterations=2000, intervalle=0.8):
     pygame.init()
     longueur = 80
     largeur = 40
-    cell_taille = 15
+    cell_taille = 20
     ecran = pygame.display.set_mode((longueur * cell_taille, largeur * cell_taille))
     pygame.display.set_caption("Simulation Wa-Tor")
 
     # initialisation de la mer
     ma_grille = Grille(longueur, largeur)
     ma_mer = Mer(ma_grille)
-    ma_mer.ajout_poissons_liste(400, 80)
+    ma_mer.ajout_poissons_requin_rochers_dans_liste(1000, 200)
 
 
     clock = pygame.time.Clock()
@@ -572,11 +591,14 @@ def start_pygame(iterations=2000, intervalle=0.8):
     img_eau = pygame.image.load("assets/eau.png")
     img_eau = pygame.transform.scale(img_eau, (cell_taille, cell_taille))
 
-    img_poisson = pygame.image.load("assets/poisson-tropical.png")
+    img_poisson = pygame.image.load("assets/poisson-clown.png")
     img_poisson = pygame.transform.scale(img_poisson, (cell_taille, cell_taille))
 
-    img_requin = pygame.image.load("assets/requin-mechant.png")
+    img_requin = pygame.image.load("assets/requin-cool.png")
     img_requin = pygame.transform.scale(img_requin, (cell_taille, cell_taille))
+
+    img_rocher = pygame.image.load("assets/rocher-pointu.png")
+    img_rocher = pygame.transform.scale(img_rocher, (cell_taille, cell_taille))
 
     while running and tour < iterations:
         # poll for events
@@ -586,7 +608,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
                 running = False
 
         # fill the screen with a color to wipe away anything from last frame
-        ecran.fill("white")
+        ecran.fill("#b3d8f4")
 
         # RENDER YOUR GAME HERE
         for i in range(longueur):
@@ -597,6 +619,8 @@ def start_pygame(iterations=2000, intervalle=0.8):
                     ecran.blit(img_requin, (i * cell_taille, j * cell_taille))
                 elif isinstance(case, Poisson):
                     ecran.blit(img_poisson, (i * cell_taille, j * cell_taille))
+                elif isinstance(case, Rocher):
+                    ecran.blit(img_rocher, (i * cell_taille, j * cell_taille))
 
         # Calcul des statistiques et affichage
         nb_poisson, nb_requin = ma_mer.compter_etats_pygame()
@@ -616,6 +640,34 @@ def start_pygame(iterations=2000, intervalle=0.8):
 
         clock.tick(10)  # limits FPS to 10
         tour += 1
+
+        #Stopper boucle quand une population s'eteint
+        if nb_poisson == 0 or nb_requin == 0 :
+            if nb_poisson == 0 :
+                perdant = f"Poissons"
+                img = pygame.image.load("assets/poisson-clown.png")
+                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
+            else:
+                perdant = f"Requins"
+                img = pygame.image.load("assets/requin-cool.png")
+                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
+            ecran.fill((0, 0, 0))  # écran fond noir
+
+            # Affiche un message à l'écran
+            font_path = "assets/press-start-2p/PressStart2P.ttf"
+            font = pygame.font.Font(font_path, 18)
+            message = f"Extinction des {perdant}! (Tours : {tour})"
+            text = font.render(message, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(ecran.get_width() // 2, ecran.get_height() // 2))
+            img_rect = img.get_rect(center=(ecran.get_width() // 2, text_rect.bottom + img.get_height() // 2 + 10))
+            ecran.blit(text, text_rect)
+            ecran.blit(img, img_rect)
+            pygame.display.flip()
+            
+            # Maintient l'écran quelques secondes
+            pygame.time.wait(3000)
+            running = False
+
 
     pygame.quit()
 
