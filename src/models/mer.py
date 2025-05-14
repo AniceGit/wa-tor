@@ -8,6 +8,7 @@ import math
 from models.poisson import Poisson
 from models.requin import Requin
 from models.grille import Grille
+from models.rocher import Rocher
 
 
 class Mer:
@@ -24,10 +25,10 @@ class Mer:
 
     # Fonction d'ajout de poissons aléatoirement à l'intilisation
     def ajout_poissons_liste(
-        self, nb_poissons: int, nb_requins: int
-    ) -> List[Union[Poisson, Requin]]:
-        liste_poissons: List[Union[Poisson, Requin]] = []
-        total = nb_poissons + nb_requins
+        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 100
+    ) -> List[Union[Poisson, Requin, Rocher]]:
+        liste_poissons: List[Union[Poisson, Requin, Rocher]] = []
+        total = nb_poissons + nb_requins + nb_rochers
         largeur = self.grille.largeur
         longueur = self.grille.longueur
 
@@ -41,13 +42,22 @@ class Mer:
             self.grille.tableau[x][y] = poisson
             liste_poissons.append(poisson)
 
-        for i in range(nb_poissons, total):
+        for i in range(nb_requins):
             x, y = cases_choisies[i]
             requin = Requin(x, y)
             self.grille.tableau[x][y] = requin
             liste_poissons.append(requin)
 
+        for i in range(nb_rochers):
+            x, y = cases_choisies[i]
+            rocher = Rocher(x, y)
+            self.grille.tableau[x][y] = rocher
+            liste_poissons.append(rocher)
+
         self.liste_poissons = liste_poissons
+
+        print(len(self.liste_poissons))
+        print(sum(1 for r in self.liste_poissons if isinstance(r, Rocher)))
         return liste_poissons
 
 #region deplacer tous basique
@@ -149,123 +159,126 @@ class Mer:
         liste_nouveaux_nes = []
 
         for poisson in list(self.liste_poissons):  # Utilise une copie pour éviter les problèmes de modification pendant l'itération
-            if not poisson.est_vivant:
-                continue
+                if not poisson.est_vivant:
+                    continue
 
-            abscisse = poisson.abscisse
-            ordonnee = poisson.ordonnee
-            voisins, coord_voisins = self.grille.voisins(abscisse, ordonnee)
+                abscisse = poisson.abscisse
+                ordonnee = poisson.ordonnee
+                voisins, coord_voisins = self.grille.voisins(abscisse, ordonnee)
 
-            if isinstance(poisson, Requin):
-                # Trouve un poisson cible avec KNN
-                cible = None
-                try:
-                    proches_poissons = [(dist, p) for dist, p in self.KNN_requin(poisson, k=1) 
-                                    if not isinstance(p, Requin) and p.est_vivant]
-                    if proches_poissons:
-                        _, cible = proches_poissons[0]
-                except Exception as e:
-                    print(f"Erreur dans KNN: {e}")
+                if isinstance(poisson, Requin):
+                    # Trouve un poisson cible avec KNN
                     cible = None
+                    try:
+                        proches_poissons = [(dist, p) for dist, p in self.KNN_requin(poisson, k=1) 
+                                        if not isinstance(p, Requin) and not isinstance(p, Rocher) and p.est_vivant]
+                        if proches_poissons:
+                            _, cible = proches_poissons[0]
+                    except Exception as e:
+                        print(f"Erreur dans KNN: {e}")
+                        cible = None
 
-                # Logique de déplacement pour le requin
-                if cible:
-                    # Calcule la direction vers la cible en tenant compte du monde toroïdal
-                    dx = (cible.abscisse - abscisse + self.grille.longueur//2) % self.grille.longueur - self.grille.longueur//2
-                    dy = (cible.ordonnee - ordonnee + self.grille.largeur//2) % self.grille.largeur - self.grille.largeur//2
-                    
-                    # Normalise pour obtenir la direction (-1, 0, ou 1)
-                    dx = (1 if dx > 0 else -1 if dx < 0 else 0)
-                    dy = (1 if dy > 0 else -1 if dy < 0 else 0)
+                    # Logique de déplacement pour le requin
+                    if cible:
+                        # Calcule la direction vers la cible en tenant compte du monde toroïdal
+                        dx = (cible.abscisse - abscisse + self.grille.longueur//2) % self.grille.longueur - self.grille.longueur//2
+                        dy = (cible.ordonnee - ordonnee + self.grille.largeur//2) % self.grille.largeur - self.grille.largeur//2
+                        
+                        # Normalise pour obtenir la direction (-1, 0, ou 1)
+                        dx = (1 if dx > 0 else -1 if dx < 0 else 0)
+                        dy = (1 if dy > 0 else -1 if dy < 0 else 0)
 
-                    # Essaie de se déplacer horizontalement d'abord
-                    nouveau_x = (abscisse + dx) % self.grille.longueur
-                    nouveau_y = ordonnee
-                    moved = False
+                        # Essaie de se déplacer horizontalement d'abord
+                        nouveau_x = (abscisse + dx) % self.grille.longueur
+                        nouveau_y = ordonnee
+                        moved = False
 
-                    if dx != 0 and self.grille.est_libre(nouveau_x, nouveau_y):
-                        moved = True  # Déplacement horizontal possible
-                    elif dy != 0:
-                        # Essaie le déplacement vertical si horizontal impossible
-                        tmp_x = abscisse
-                        tmp_y = (ordonnee + dy) % self.grille.largeur
-                        if self.grille.est_libre(tmp_x, tmp_y):
-                            nouveau_x, nouveau_y = tmp_x, tmp_y
+                        if dx != 0 and self.grille.est_libre(nouveau_x, nouveau_y):
+                            moved = True  # Déplacement horizontal possible
+                        elif dy != 0:
+                            # Essaie le déplacement vertical si horizontal impossible
+                            tmp_x = abscisse
+                            tmp_y = (ordonnee + dy) % self.grille.largeur
+                            if self.grille.est_libre(tmp_x, tmp_y):
+                                nouveau_x, nouveau_y = tmp_x, tmp_y
+                                moved = True
+                        
+                        # Vérifie si on peut manger le poisson cible
+                        target_position = ((abscisse + dx) % self.grille.longueur, 
+                                        (ordonnee + dy) % self.grille.largeur)
+                        
+                        if (target_position[0], target_position[1]) == (cible.abscisse, cible.ordonnee):
+                            # Le requin mange le poisson
+                            cible.est_vivant = False
+                            self.grille.tableau[cible.abscisse][cible.ordonnee] = None
+                            poisson.manger()
+                            nouveau_x, nouveau_y = cible.abscisse, cible.ordonnee
                             moved = True
-                    
-                    # Vérifie si on peut manger le poisson cible
-                    target_position = ((abscisse + dx) % self.grille.longueur, 
-                                    (ordonnee + dy) % self.grille.largeur)
-                    
-                    if (target_position[0], target_position[1]) == (cible.abscisse, cible.ordonnee):
-                        # Le requin mange le poisson
-                        cible.est_vivant = False
-                        self.grille.tableau[cible.abscisse][cible.ordonnee] = None
-                        poisson.manger()
-                        nouveau_x, nouveau_y = cible.abscisse, cible.ordonnee
-                        moved = True
-                    
-                    # Déplace le requin si possible
-                    if moved:
-                        # Efface l'ancienne position
-                        self.grille.tableau[abscisse][ordonnee] = None
-                        # Met à jour la position du requin
-                        poisson.deplacer(nouveau_x, nouveau_y)
-                        # Met à jour la grille avec le requin à la nouvelle position
-                        self.grille.tableau[nouveau_x][nouveau_y] = poisson
-                else:
-                    # Aucun poisson cible trouvé, se déplace aléatoirement si possible
-                    free_spaces = [(i, pos) for i, (pos, content) in enumerate(zip(coord_voisins, voisins)) if content is None]
-                    if free_spaces:
-                        idx, (nouveau_x, nouveau_y) = random.choice(free_spaces)
-                        # Efface l'ancienne position
-                        self.grille.tableau[abscisse][ordonnee] = None
-                        # Met à jour la position du requin
-                        poisson.deplacer(nouveau_x, nouveau_y)
-                        # Met à jour la grille avec le requin à la nouvelle position
-                        self.grille.tableau[nouveau_x][nouveau_y] = poisson
+                        
+                        # Déplace le requin si possible
+                        if moved:
+                            # Efface l'ancienne position
+                            self.grille.tableau[abscisse][ordonnee] = None
+                            # Met à jour la position du requin
+                            poisson.deplacer(nouveau_x, nouveau_y)
+                            # Met à jour la grille avec le requin à la nouvelle position
+                            self.grille.tableau[nouveau_x][nouveau_y] = poisson
+                    else:
+                        # Aucun poisson cible trouvé, se déplace aléatoirement si possible
+                        free_spaces = [(i, pos) for i, (pos, content) in enumerate(zip(coord_voisins, voisins)) if content is None]
+                        if free_spaces:
+                            idx, (nouveau_x, nouveau_y) = random.choice(free_spaces)
+                            # Efface l'ancienne position
+                            self.grille.tableau[abscisse][ordonnee] = None
+                            # Met à jour la position du requin
+                            poisson.deplacer(nouveau_x, nouveau_y)
+                            # Met à jour la grille avec le requin à la nouvelle position
+                            self.grille.tableau[nouveau_x][nouveau_y] = poisson
 
-                # Gère la reproduction du requin
-                peut_reproduire = poisson.reproduire()
-                if peut_reproduire:  # Si la reproduction est possible
-                    nouveau_ne = Requin(abscisse, ordonnee)
-                    liste_nouveaux_nes.append(nouveau_ne)
-                    self.grille.tableau[abscisse][ordonnee] = nouveau_ne
-                    poisson.a_accouche = True
-
-                # Vérifie si le requin meurt de faim ou de vieillesse
-                if poisson.energie <= 0 or poisson.age==0:
-                    poisson.est_vivant = False
-                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
-
-            else:  # Déplacement d'un poisson normal
-                # Trouve les cellules voisines vides
-                free_spaces = [(i, pos) for i, (pos, content) in enumerate(zip(coord_voisins, voisins)) if content is None]
-                
-                if free_spaces:
-                    # Choisit une cellule vide aléatoire
-                    idx, (nouveau_x, nouveau_y) = random.choice(free_spaces)
-                    
-                    # Gère la reproduction du poisson
+                    # Gère la reproduction du requin
                     peut_reproduire = poisson.reproduire()
                     if peut_reproduire:  # Si la reproduction est possible
-                        nouveau_ne = Poisson(abscisse, ordonnee)
+                        nouveau_ne = Requin(abscisse, ordonnee)
                         liste_nouveaux_nes.append(nouveau_ne)
                         self.grille.tableau[abscisse][ordonnee] = nouveau_ne
                         poisson.a_accouche = True
-                    else:
-                        # Si pas de reproduction, efface l'ancienne cellule
-                        self.grille.tableau[abscisse][ordonnee] = None
+
+                    # Vérifie si le requin meurt de faim ou de vieillesse
+                    if poisson.energie <= 0 or poisson.age==0:
+                        poisson.est_vivant = False
+                        self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+
+                elif isinstance(poisson, Poisson):  # Déplacement d'un poisson normal
+                    # Trouve les cellules voisines vides
+                    free_spaces = [(i, pos) for i, (pos, content) in enumerate(zip(coord_voisins, voisins)) if content is None]
                     
-                    # Déplace le poisson
-                    poisson.deplacer(nouveau_x, nouveau_y)
-                    self.grille.tableau[nouveau_x][nouveau_y] = poisson
+                    if free_spaces:
+                        # Choisit une cellule vide aléatoire
+                        idx, (nouveau_x, nouveau_y) = random.choice(free_spaces)
+                        
+                        # Gère la reproduction du poisson
+                        peut_reproduire = poisson.reproduire()
+                        if peut_reproduire:  # Si la reproduction est possible
+                            nouveau_ne = Poisson(abscisse, ordonnee)
+                            liste_nouveaux_nes.append(nouveau_ne)
+                            self.grille.tableau[abscisse][ordonnee] = nouveau_ne
+                            poisson.a_accouche = True
+                        else:
+                            # Si pas de reproduction, efface l'ancienne cellule
+                            self.grille.tableau[abscisse][ordonnee] = None
+                        
+                        # Déplace le poisson
+                        poisson.deplacer(nouveau_x, nouveau_y)
+                        self.grille.tableau[nouveau_x][nouveau_y] = poisson
 
-                # Vérifie si le poisson meurt de vieillesse
-                if poisson.age==0:
-                    poisson.est_vivant = False
-                    self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+                    # Vérifie si le poisson meurt de vieillesse
+                    if poisson.age==0:
+                        poisson.est_vivant = False
+                        self.grille.tableau[poisson.abscisse][poisson.ordonnee] = None
+                else :
+                    self.grille.tableau[abscisse][ordonnee] = poisson
 
+        
         # Ajoute les nouveau-nés à la liste
         self.liste_poissons.extend(liste_nouveaux_nes)
 
@@ -278,6 +291,9 @@ class Mer:
             p.a_accouche = False
             if isinstance(p, Requin):
                 p.a_mange = False
+
+        print(len(self.liste_poissons))
+        print(sum(1 for r in self.liste_poissons if isinstance(r, Rocher)))
 
 
 #region knn requin
@@ -512,7 +528,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
     # initialisation de la mer
     ma_grille = Grille(longueur, largeur)
     ma_mer = Mer(ma_grille)
-    ma_mer.ajout_poissons_liste(400, 80)
+    ma_mer.ajout_poissons_liste(400, 200)
 
 
     clock = pygame.time.Clock()
@@ -528,6 +544,9 @@ def start_pygame(iterations=2000, intervalle=0.8):
 
     img_requin = pygame.image.load("assets/requin-cool.png")
     img_requin = pygame.transform.scale(img_requin, (cell_taille, cell_taille))
+
+    img_rocher = pygame.image.load("assets/rocher-pointu.png")
+    img_rocher = pygame.transform.scale(img_rocher, (cell_taille, cell_taille))
 
     while running and tour < iterations:
         # poll for events
@@ -548,6 +567,8 @@ def start_pygame(iterations=2000, intervalle=0.8):
                     ecran.blit(img_requin, (i * cell_taille, j * cell_taille))
                 elif isinstance(case, Poisson):
                     ecran.blit(img_poisson, (i * cell_taille, j * cell_taille))
+                elif isinstance(case, Rocher):
+                    ecran.blit(img_rocher, (i * cell_taille, j * cell_taille))
 
         # Calcul des statistiques et affichage
         nb_poisson, nb_requin = ma_mer.compter_etats_pygame()
@@ -578,7 +599,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
                 perdant = f"Requins"
                 img = pygame.image.load("assets/requin-cool.png")
                 img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
-            ecran.fill((0, 0, 0))  # Efface l'écran avec un fond noir
+            ecran.fill((0, 0, 0))  # écran fond noir
 
             # Affiche un message à l'écran
             font_path = "assets/press-start-2p/PressStart2P.ttf"
@@ -591,7 +612,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
             ecran.blit(img, img_rect)
             pygame.display.flip()
             
-            # Attend quelques secondes pour que le message soit visible
+            # Maintient l'écran quelques secondes
             pygame.time.wait(3000)
             running = False
 
