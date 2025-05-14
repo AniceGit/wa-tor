@@ -445,6 +445,7 @@ def start(iterations=300, intervalle=0.2):
 
 
 # -------------------------START PYGAME----------------------------
+#region effet retro
 def ajouter_scanlines(ecran):
     # Créer des lignes horizontales toutes les 4 pixels, sur toute la hauteur de l’écran
     hauteur_pixels = ecran.get_height()

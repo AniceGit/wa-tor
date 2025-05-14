@@ -11,7 +11,7 @@ class Requin(Poisson):
 
     def manger(self):
         # self.energie += self.energie_initiale
-        self.energie += 4
+        self.energie += 5
 
     def deplacer(self, x, y):
         super().deplacer(x, y)
