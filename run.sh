@@ -1,1 +1,1 @@
-PYTHONPATH=./src python3 src/models/mer.py
+PYTHONPATH=./src python3 src/main.py
