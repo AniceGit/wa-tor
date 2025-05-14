@@ -258,8 +258,8 @@ class Mer:
                             d = self.distance_manhattan(nx, ny,
                                                         requin_menacant.abscisse, requin_menacant.ordonnee)
                             if d > meilleures_distance_de_fuite:
-                                meilleures_distance_de_fuite, best = d, (nx, ny)
-                        nx, ny = best
+                                meilleures_distance_de_fuite, meilleur_coordonnee = d, (nx, ny)
+                        nx, ny = meilleur_coordonnee
                     else:
                         # sinon choix aléatoire
                         nx, ny = random.choice(libre)
