@@ -25,7 +25,7 @@ class Mer:
 
     # Fonction d'ajout de poissons aléatoirement à l'intilisation
     def ajout_poissons_liste(
-        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 100
+        self, nb_poissons: int, nb_requins: int, nb_rochers:int = 300
     ) -> List[Union[Poisson, Requin, Rocher]]:
         liste_poissons: List[Union[Poisson, Requin, Rocher]] = []
         total = nb_poissons + nb_requins + nb_rochers
@@ -42,13 +42,13 @@ class Mer:
             self.grille.tableau[x][y] = poisson
             liste_poissons.append(poisson)
 
-        for i in range(nb_requins):
+        for i in range(nb_poissons,nb_requins+nb_poissons):
             x, y = cases_choisies[i]
             requin = Requin(x, y)
             self.grille.tableau[x][y] = requin
             liste_poissons.append(requin)
 
-        for i in range(nb_rochers):
+        for i in range(nb_requins+nb_poissons, nb_rochers+nb_requins+nb_poissons):
             x, y = cases_choisies[i]
             rocher = Rocher(x, y)
             self.grille.tableau[x][y] = rocher
@@ -297,7 +297,7 @@ class Mer:
 
 
 #region knn requin
-    def KNN_requin(self, requin: Requin, k: int = 1, champ_de_vision: int = 1) -> List[Tuple[float, Poisson]]:
+    def KNN_requin(self, requin: Requin, k: int = 1, champ_de_vision: int = 2) -> List[Tuple[float, Poisson]]:
         """
         Trouve les k poissons les plus proches du requin en utilisant la distance de Manhattan.
         Prend en compte la nature toroïdale du monde (bords connectés).
@@ -603,16 +603,21 @@ def start_pygame(iterations=2000, intervalle=0.8):
             ecran.fill((0, 0, 0))  # écran fond noir
 
             # Affiche un message à l'écran
+            img_dino = pygame.image.load("assets/dino_squelette.png")
+            img_dino = pygame.transform.scale(img_dino, (cell_taille*10, cell_taille*10))
+
             font_path = "assets/press-start-2p/PressStart2P.ttf"
             font = pygame.font.Font(font_path, 18)
             message = f"Extinction des {perdant}! (Tours : {tour})"
             text = font.render(message, True, (255, 255, 255))
             text_rect = text.get_rect(center=(ecran.get_width() // 2, ecran.get_height() // 2))
-            img_rect = img.get_rect(center=(ecran.get_width() // 2, text_rect.bottom + img.get_height() // 2 + 10))
+            img_rect_perdant = img.get_rect(center=(ecran.get_width() // 1.5, text_rect.bottom + img.get_height() // 2 + 10))
+            img_rect_dino = img_dino.get_rect(center=(ecran.get_width() // 2.5, text_rect.bottom + img_dino.get_height() // 2 + 10))
             ecran.blit(text, text_rect)
-            ecran.blit(img, img_rect)
+            ecran.blit(img, img_rect_perdant)
+            ecran.blit(img_dino, img_rect_dino)
             pygame.display.flip()
-            
+            ajouter_effet_crt(ecran)
             # Maintient l'écran quelques secondes
             pygame.time.wait(3000)
             running = False
