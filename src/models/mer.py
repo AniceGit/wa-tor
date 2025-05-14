@@ -505,7 +505,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
     pygame.init()
     longueur = 80
     largeur = 40
-    cell_taille = 15
+    cell_taille = 20
     ecran = pygame.display.set_mode((longueur * cell_taille, largeur * cell_taille))
     pygame.display.set_caption("Simulation Wa-Tor")
 
@@ -523,10 +523,10 @@ def start_pygame(iterations=2000, intervalle=0.8):
     img_eau = pygame.image.load("assets/eau.png")
     img_eau = pygame.transform.scale(img_eau, (cell_taille, cell_taille))
 
-    img_poisson = pygame.image.load("assets/poisson-tropical.png")
+    img_poisson = pygame.image.load("assets/poisson-clown.png")
     img_poisson = pygame.transform.scale(img_poisson, (cell_taille, cell_taille))
 
-    img_requin = pygame.image.load("assets/requin-mechant.png")
+    img_requin = pygame.image.load("assets/requin-cool.png")
     img_requin = pygame.transform.scale(img_requin, (cell_taille, cell_taille))
 
     while running and tour < iterations:
@@ -537,7 +537,7 @@ def start_pygame(iterations=2000, intervalle=0.8):
                 running = False
 
         # fill the screen with a color to wipe away anything from last frame
-        ecran.fill("white")
+        ecran.fill("#b3d8f4")
 
         # RENDER YOUR GAME HERE
         for i in range(longueur):
@@ -567,6 +567,34 @@ def start_pygame(iterations=2000, intervalle=0.8):
 
         clock.tick(10)  # limits FPS to 10
         tour += 1
+
+        #Stopper boucle quand une population s'eteint
+        if nb_poisson == 0 or nb_requin == 0 :
+            if nb_poisson == 0 :
+                perdant = f"Poissons"
+                img = pygame.image.load("assets/poisson-clown.png")
+                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
+            else:
+                perdant = f"Requins"
+                img = pygame.image.load("assets/requin-cool.png")
+                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
+            ecran.fill((0, 0, 0))  # Efface l'écran avec un fond noir
+
+            # Affiche un message à l'écran
+            font_path = "assets/press-start-2p/PressStart2P.ttf"
+            font = pygame.font.Font(font_path, 18)
+            message = f"Extinction des {perdant}! (Tours : {tour})"
+            text = font.render(message, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(ecran.get_width() // 2, ecran.get_height() // 2))
+            img_rect = img.get_rect(center=(ecran.get_width() // 2, text_rect.bottom + img.get_height() // 2 + 10))
+            ecran.blit(text, text_rect)
+            ecran.blit(img, img_rect)
+            pygame.display.flip()
+            
+            # Attend quelques secondes pour que le message soit visible
+            pygame.time.wait(3000)
+            running = False
+
 
     pygame.quit()
 
