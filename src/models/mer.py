@@ -14,10 +14,17 @@ from models.rocher import Rocher
 class Mer:
     def __init__(self, grille):
         self.grille: Grille = grille
+        self.historique_poissons = []
+        self.historique_requins = []
         self.liste_poissons: List[Poisson] = []
         self.liste_requins: List[Requin] = []
         self.liste_rochers: List[Rocher] = []
         self.liste_creatures: List[Poisson, Requin] = []
+        self.min_poisson = self.grille.largeur * self.grille.longueur 
+        self.max_poisson = -1       
+
+        self.min_requin = self.grille.largeur * self.grille.longueur 
+        self.max_requin = -1
 #region Ajouts poissons
     # Fonction d'ajout d'un poisson à la grille
     def ajout_poisson(self, un_poisson: Poisson):
@@ -284,6 +291,15 @@ class Mer:
 
         self.liste_requins = [p for p in self.liste_requins if p.est_vivant]
         self.liste_requins.extend(liste_nouveaux_nes_requins)
+        self.historique_poissons.append(len([p for p in self.liste_poissons if p.est_vivant]))
+        self.historique_requins.append(len([r for r in self.liste_requins if r.est_vivant]))
+        # if self.historique_poissons > self.
+        # self.min_poisson
+        # self.max_poisson        
+
+        # self.min_requin
+        # self.max_requin
+
 
 
 
@@ -458,8 +474,6 @@ def start(iterations=300, intervalle=0.2):
         ma_mer.deplacer_tous()
         time.sleep(intervalle)
 
-
-
 # -------------------------START PYGAME----------------------------
 def ajouter_scanlines(ecran):
     # Créer des lignes horizontales toutes les 4 pixels, sur toute la hauteur de l’écran
@@ -490,21 +504,28 @@ def ajouter_effet_crt(ecran):
     ecran.blit(effet_surface, (0, 0))
 
 
-
-
 #region afficher stats pygame
-def afficher_stats_pygame(poissons, requins, ecran, tour):
+def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
     # Définir une police et une taille
     font_path = "assets/press-start-2p/PressStart2P.ttf"
-    font = pygame.font.Font(font_path, 18)
+    font = pygame.font.Font(font_path, 12)
     color_text_black = (0, 0, 0)
+    color_text_brown = (165,42,42)
     color_text_vert = (144, 238, 144)
     color_text_rouge = (255, 100, 100)
+    color_text_vert_fluo = (0,255,26)
+    color_text_bleu_marine = (0,0,128)
 
     """Affiche les statistiques de la simulation."""
     texte_poissons = f"Poissons: {poissons}"
     texte_requins = f"Requins: {requins}"
+    texte_rochers = f"Rochers: {rochers}"
     texte_tour = f"TOUR: {tour}"
+
+    text_poissons_max = f"Poissons max: {mer.max_poisson}"
+    text_poissons_min = f"Poissons min: {mer.min_poisson}"
+    text_requins_max = f"Requins max: {mer.max_requin}"
+    text_requins_min = f"Requins min: {mer.min_poisson}"
 
     # Couleur text dynamique
     if poissons > requins:
@@ -518,10 +539,15 @@ def afficher_stats_pygame(poissons, requins, ecran, tour):
         texte_requins_surface = font.render(texte_requins, True, color_text_black)
     
     texte_tour_surface = font.render(texte_tour, True, color_text_black)
+    texte_rochers_surface = font.render(texte_rochers, True, color_text_brown)
+    texte_poissons_max_surface = font.render(text_poissons_max, True, color_text_vert_fluo)
+    text_poissons_min_surface = font.render(text_poissons_min, True, color_text_vert_fluo)
+    text_requins_max_surface = font.render(text_requins_max, True, color_text_bleu_marine)
+    text_requins_min_surface = font.render(text_requins_min, True, color_text_bleu_marine)
 
-    # Barckgound des stats
+    # Barckgound des stats chiffres
     color_background = (0, 119, 190)
-    stats_surface = pygame.Surface((ecran.get_width() // 4, 80))  # taille brackground
+    stats_surface = pygame.Surface((ecran.get_width() // 3.7 , 160))  #80# taille brackground
     stats_surface.fill(color_background)  # couleur fond
     stats_surface.set_alpha(180)  # modif opacité
 
@@ -529,12 +555,52 @@ def afficher_stats_pygame(poissons, requins, ecran, tour):
     ecran.blit(stats_surface, (0, 0))
     ecran.blit(texte_poissons_surface, (10, 10))
     ecran.blit(texte_requins_surface, (10, 50))
-    ecran.blit(texte_tour_surface, (10, 90))
+    ecran.blit(texte_rochers_surface, (10, 90))
+    ecran.blit(texte_tour_surface, (10, 130))
+
+    ecran.blit(texte_poissons_max_surface, (stats_surface.get_width()/2, 10))
+    ecran.blit(text_poissons_min_surface, (stats_surface.get_width()/2, 50))
+    ecran.blit(text_requins_max_surface, (stats_surface.get_width()/2, 90))
+    ecran.blit(text_requins_min_surface, (stats_surface.get_width()/2, 130))
+
+    ######
+    #AFFICHAGE DU GRAPH À DROITE DE L'ECRAN
+    color_background_graph = (0, 119, 190)
+    stats_surface_graph = pygame.Surface((ecran.get_width() // 4.5 , 200))  #80# taille brackground
+    stats_surface_graph.fill(color_background_graph)  # couleur fond
+    stats_surface_graph.set_alpha(180)  # modif opacité
+
+    afficher_graphiques(stats_surface_graph, mer.historique_poissons, mer.historique_requins)
+    ecran.blit(stats_surface_graph, (ecran.get_width() - ecran.get_width() // 4.5 ,0))  # x et y = position du graphe
+    ######
+
+# Affichage du graphique pygame
+def afficher_graphiques(surface, historique_poissons, historique_requins, largeur=300, hauteur=200):
+
+    if len(historique_poissons) < 2:
+        return
+
+    max_val = max(max(historique_poissons), max(historique_requins), 1)
+
+    for i in range(1, len(historique_poissons)):
+        x1 = (i - 1) * largeur // len(historique_poissons)
+        x2 = i * largeur // len(historique_poissons)
+
+        y1_p = hauteur - (historique_poissons[i - 1] * hauteur // max_val)
+        y2_p = hauteur - (historique_poissons[i] * hauteur // max_val)
+
+        y1_r = hauteur - (historique_requins[i - 1] * hauteur // max_val)
+        y2_r = hauteur - (historique_requins[i] * hauteur // max_val)
+
+        pygame.draw.line(surface, (0, 255, 0), (x1, y1_p), (x2, y2_p), 2)  # Poissons en vert
+        pygame.draw.line(surface, (255, 0, 0), (x1, y1_r), (x2, y2_r), 2)  # Requins en rouge
+
 
 #region start pygame
 def start_pygame(iterations=2000, intervalle=0.8):
     # pygame setup
     pygame.init()
+    
     longueur = 80
     largeur = 40
     cell_taille = 20
@@ -588,17 +654,16 @@ def start_pygame(iterations=2000, intervalle=0.8):
 
         # Calcul des statistiques et affichage
         nb_poisson, nb_requin = ma_mer.compter_etats_pygame()
-        afficher_stats_pygame(nb_poisson, nb_requin, ecran, tour)
+        nb_rochers = len(ma_mer.liste_rochers)
+        afficher_stats_pygame(ma_mer, nb_poisson, nb_requin, nb_rochers, ecran, tour)
 
         # Style retro
         #ajouter_scanlines(ecran)
         ajouter_effet_crt(ecran)
 
-
-
         # On déplace les poissons et requins
         ma_mer.deplacer_tous()
-
+        
         # flip() the display to put your work on screen
         pygame.display.flip()
 
