@@ -12,6 +12,23 @@ from models.rocher import Rocher
 
 
 class Mer:
+    """
+    Classe représentant un environnement marin dans une grille torique.
+    Gère les entités vivantes : poissons, requins et rochers, ainsi que leur logique de déplacement, reproduction,
+    alimentation et extinction.
+
+    Attributs :
+        grille (Grille): La grille représentant l'environnement.
+        historique_poissons (List[int]): Historique du nombre de poissons à chaque tour.
+        historique_requins (List[int]): Historique du nombre de requins à chaque tour.
+        liste_poissons (List[Poisson]): Liste des poissons vivants.
+        liste_requins (List[Requin]): Liste des requins vivants.
+        liste_rochers (List[Rocher]): Liste des rochers placés dans la mer.
+        min_poisson (int): Nombre minimal de poissons observé.
+        max_poisson (int): Nombre maximal de poissons observé.
+        min_requin (int): Nombre minimal de requins observé.
+        max_requin (int): Nombre maximal de requins observé.
+    """
     def __init__(self, grille):
         self.grille: Grille = grille
         self.historique_poissons = []
@@ -32,6 +49,12 @@ class Mer:
 #region Ajouts poissons
     # Fonction d'ajout d'un poisson à la grille
     def ajout_poisson(self, un_poisson: Poisson):
+        """
+        Ajoute un poisson à la grille à sa position donnée (modulo la taille de la grille).
+
+        Args:
+            un_poisson (Poisson): L'instance du poisson à ajouter.
+        """
         abscisse = un_poisson.abscisse % self.grille.longueur
         ordonnee = un_poisson.ordonnee % self.grille.largeur
 
@@ -40,6 +63,14 @@ class Mer:
     # Fonction d'ajout de poissons aléatoirement à l'intilisation
     def ajout_poissons_requin_rochers_dans_liste(
         self, nb_poissons: int, nb_requins: int, nb_rochers:int = 300):
+        """
+        Ajoute un nombre spécifié de poissons, requins et rochers à des positions aléatoires sur la grille.
+
+        Args:
+            nb_poissons (int): Nombre de poissons à générer.
+            nb_requins (int): Nombre de requins à générer.
+            nb_rochers (int, optional): Nombre de rochers à générer (par défaut 300).
+        """
         total = nb_poissons + nb_requins + nb_rochers
         largeur = self.grille.largeur
         longueur = self.grille.longueur
@@ -160,6 +191,13 @@ class Mer:
 
 #region deplacer tous knn
     def deplacer_tous(self):
+        """
+        Déplace toutes les créatures (poissons et requins) en fonction de leur logique respective :
+        - Les requins poursuivent les poissons dans leur champ de vision (KNN).
+        - Les poissons fuient les requins ou se déplacent aléatoirement.
+        - Les entités peuvent se reproduire ou mourir (faim ou prédation).
+        Met à jour les listes d'entités, la grille et les statistiques.
+        """
         #liste_nouveaux_nes : List[Poisson, Requin] = []
         liste_nouveaux_nes_poissons : List[Poisson] = []
         liste_nouveaux_nes_requins : List[Requin] = []
@@ -324,6 +362,17 @@ class Mer:
 
 #region knn requin
     def KNN_requin(self, requin: Requin, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Poisson]]:
+        """
+        Recherche les k poissons les plus proches d'un requin dans un rayon défini.
+
+        Args:
+            requin (Requin): Le requin observant son environnement.
+            k (int): Nombre de voisins les plus proches à retourner.
+            champ_de_vision (int): Distance maximale de vision.
+
+        Returns:
+            List[Tuple[float, Poisson]]: Liste des tuples (distance, poisson).
+        """
         liste_distances = []
         
         for poisson in self.liste_poissons:  # Chercher parmi les poissons
@@ -367,6 +416,17 @@ class Mer:
     
 #region knn poisson
     def KNN_poisson(self, poisson: Poisson, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Requin]]:
+        """
+        Recherche les k requins les plus proches d’un poisson dans un rayon défini.
+
+        Args:
+            poisson (Poisson): Le poisson observant son environnement.
+            k (int): Nombre de voisins les plus proches à retourner.
+            champ_de_vision (int): Distance maximale de vision.
+
+        Returns:
+            List[Tuple[float, Requin]]: Liste des tuples (distance, requin).
+        """
         liste_distances = []
         
         for requin in self.liste_requins:  # Chercher parmi les requins, pas les poissons
@@ -414,6 +474,12 @@ class Mer:
 #region statistiques pygame
     # Comptage statistique sur pygame
     def compter_etats_pygame(self) -> Tuple[int, int]:
+        """
+        Compte le nombre de poissons et de requins pour affichage dans l’interface Pygame.
+
+        Returns:
+            Tuple[int, int]: Nombre de poissons et nombre de requins.
+        """
         nb_poissons = 0
         nb_requins = 0
         for ligne in self.grille.tableau:
@@ -427,6 +493,13 @@ class Mer:
 
 #region str et repr
     def __str__(self):
+        """
+        Retourne une représentation textuelle de la grille avec des emojis,
+        en couleurs selon le type de créature.
+
+        Returns:
+            str: Représentation ASCII de l’état de la mer.
+        """
         largeur_case = 2
         nb_colonnes = len(self.grille.tableau[0])
         bordure_longueur = nb_colonnes * largeur_case
@@ -440,17 +513,32 @@ class Mer:
                     sortie += "\033[41m🦈\033[0m"
                 elif isinstance(case, Poisson):
                     sortie += "\033[42m🐟\033[0m"
+                elif isinstance(case, Rocher):
+                    sortie += "\033[44m🪨\033[0m"
             sortie += "║\n"
         sortie += "╚" + "═" * bordure_longueur + "╝"
         return sortie
 
     def __repr__(self):
+        """
+        Fournit une représentation officielle de la mer.
+
+        Returns:
+            str: Représentation ASCII de la mer.
+        """
         return str(self)
 
 
 #region start console
 # -------------------------START CONSOLE----------------------------
 def start(iterations=300, intervalle=0.2):
+    """
+    Lance la simulation de l'écosystème Wa-Tor en mode console.
+
+    Arguments:
+        iterations (int): Le nombre de tours à simuler. Par défaut, 300 tours.
+        intervalle (float): Le temps d'attente entre chaque tour en secondes. Par défaut, 0.2 secondes.
+    """
     longueur = 80
     largeur = 25
     ma_grille = Grille(longueur, largeur)
@@ -468,13 +556,24 @@ def start(iterations=300, intervalle=0.2):
 
 # -------------------------START PYGAME----------------------------
 def ajouter_scanlines(ecran):
+    """
+    Ajoute des lignes horizontales (scanlines) à l'écran pour un effet rétro.
+
+    Arguments:
+        ecran (pygame.Surface): La surface sur laquelle dessiner les lignes.
+    """
     # Créer des lignes horizontales toutes les 4 pixels, sur toute la hauteur de l’écran
     hauteur_pixels = ecran.get_height()
     for i in range(0, hauteur_pixels, 4):
         pygame.draw.line(ecran, (0, 0, 0), (0, i), (ecran.get_width(), i), 1)
 
 def ajouter_effet_crt(ecran):
-    """Ajoute un effet CRT rétro avec scanlines et grain."""
+    """
+    Applique un effet CRT rétro avec des scanlines et du bruit (grain) à l'écran.
+
+    Arguments:
+        ecran (pygame.Surface): La surface sur laquelle appliquer l'effet.
+    """
     largeur, hauteur = ecran.get_size()
 
     # Création d'une surface temporaire semi-transparente
@@ -498,13 +597,24 @@ def ajouter_effet_crt(ecran):
 
 #region afficher stats pygame
 def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
+    """
+    Affiche les statistiques de la simulation sur l'écran dans un style rétro.
+
+    Arguments:
+        mer (Mer): L'instance de la mer qui contient les informations de l'écosystème.
+        poissons (int): Le nombre de poissons dans la simulation.
+        requins (int): Le nombre de requins dans la simulation.
+        rochers (int): Le nombre de rochers dans la simulation.
+        ecran (pygame.Surface): La surface sur laquelle afficher les statistiques.
+        tour (int): Le numéro du tour actuel de la simulation.
+    """
     # Définir une police et une taille
     font_path = "assets/press-start-2p/PressStart2P.ttf"
     font = pygame.font.Font(font_path, 12)
     color_text_black = (0, 0, 0)
-    color_text_brown = (165,42,42)
+    color_text_brown = (48, 48, 48)
     color_text_vert = (144, 238, 144)
-    color_text_rouge = (255, 100, 100)
+    color_text_rouge = (255, 93, 34)
     color_text_vert_fluo = (0,255,26)
     color_text_bleu_marine = (0,0,128)
 
@@ -541,7 +651,7 @@ def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
     color_background = (0, 119, 190)
     stats_surface = pygame.Surface((ecran.get_width() // 3.7 , 160))  #80# taille brackground
     stats_surface.fill(color_background)  # couleur fond
-    stats_surface.set_alpha(180)  # modif opacité
+    stats_surface.set_alpha(230)  # modif opacité
 
     # Affiche le texte à des positions spécifiques sur l'écran
     ecran.blit(stats_surface, (0, 0))
@@ -560,7 +670,7 @@ def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
     color_background_graph = (0, 119, 190)
     stats_surface_graph = pygame.Surface((ecran.get_width() // 4.5 , 200))  #80# taille brackground
     stats_surface_graph.fill(color_background_graph)  # couleur fond
-    stats_surface_graph.set_alpha(180)  # modif opacité
+    stats_surface_graph.set_alpha(230)  # modif opacité
 
     afficher_graphiques(stats_surface_graph, mer.historique_poissons, mer.historique_requins)
     ecran.blit(stats_surface_graph, (ecran.get_width() - ecran.get_width() // 4.5 ,0))  # x et y = position du graphe
@@ -568,7 +678,16 @@ def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
 
 # Affichage du graphique pygame
 def afficher_graphiques(surface, historique_poissons, historique_requins, largeur=300, hauteur=200):
+    """
+    Affiche les graphiques de l'évolution des populations de poissons et de requins.
 
+    Arguments:
+        surface (pygame.Surface): La surface sur laquelle afficher les graphiques.
+        historique_poissons (list): Liste des populations de poissons à chaque tour.
+        historique_requins (list): Liste des populations de requins à chaque tour.
+        largeur (int): La largeur du graphique. Par défaut, 300 pixels.
+        hauteur (int): La hauteur du graphique. Par défaut, 200 pixels.
+    """
     if len(historique_poissons) < 2:
         return
 
@@ -584,12 +703,19 @@ def afficher_graphiques(surface, historique_poissons, historique_requins, largeu
         y1_r = hauteur - (historique_requins[i - 1] * hauteur // max_val)
         y2_r = hauteur - (historique_requins[i] * hauteur // max_val)
 
-        pygame.draw.line(surface, (0, 255, 0), (x1, y1_p), (x2, y2_p), 2)  # Poissons en vert
-        pygame.draw.line(surface, (255, 0, 0), (x1, y1_r), (x2, y2_r), 2)  # Requins en rouge
+        pygame.draw.line(surface, (0,255,26), (x1, y1_p), (x2, y2_p), 2)  # Poissons en vert
+        pygame.draw.line(surface, (0,0,128), (x1, y1_r), (x2, y2_r), 2)  # Requins en bleu
 
 
 #region start pygame
 def start_pygame(iterations=2000, intervalle=0.8):
+    """
+    Lance la simulation de l'écosystème Wa-Tor avec l'interface graphique Pygame.
+
+    Arguments:
+        iterations (int): Le nombre de tours à simuler. Par défaut, 2000 tours.
+        intervalle (float): Le temps d'attente entre chaque tour en secondes. Par défaut, 0.8 secondes.
+    """
     # pygame setup
     pygame.init()
     
