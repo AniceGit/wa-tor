@@ -20,11 +20,15 @@ class Mer:
         self.liste_requins: List[Requin] = []
         self.liste_rochers: List[Rocher] = []
         self.liste_creatures: List[Poisson, Requin] = []
-        self.min_poisson = self.grille.largeur * self.grille.longueur 
-        self.max_poisson = -1       
+        # self.min_poisson = self.grille.largeur * self.grille.longueur 
+        # self.max_poisson = -1       
 
-        self.min_requin = self.grille.largeur * self.grille.longueur 
-        self.max_requin = -1
+        # self.min_requin = self.grille.largeur * self.grille.longueur 
+        # self.max_requin = -1
+        self.min_poisson = None
+        self.max_poisson = None
+        self.min_requin = None
+        self.max_requin = None
 #region Ajouts poissons
     # Fonction d'ajout d'un poisson à la grille
     def ajout_poisson(self, un_poisson: Poisson):
@@ -286,20 +290,31 @@ class Mer:
 
         # fin de boucle : on ajoute les nouveau-nés et on supprime les morts
         
+        # self.liste_poissons = [p for p in self.liste_poissons if p.est_vivant]
+        # self.liste_poissons.extend(liste_nouveaux_nes_poissons)
+# Mise à jour des listes principales (suppression des morts)
         self.liste_poissons = [p for p in self.liste_poissons if p.est_vivant]
+        self.liste_requins = [r for r in self.liste_requins if r.est_vivant]
+
+        # Ajout des nouveaux-nés
         self.liste_poissons.extend(liste_nouveaux_nes_poissons)
-
-        self.liste_requins = [p for p in self.liste_requins if p.est_vivant]
         self.liste_requins.extend(liste_nouveaux_nes_requins)
-        self.historique_poissons.append(len([p for p in self.liste_poissons if p.est_vivant]))
-        self.historique_requins.append(len([r for r in self.liste_requins if r.est_vivant]))
-        # if self.historique_poissons > self.
-        # self.min_poisson
-        # self.max_poisson        
 
-        # self.min_requin
-        # self.max_requin
+        # Mise à jour de l'historique
+        nb_poissons = len(self.liste_poissons)
+        nb_requins = len(self.liste_requins)
+        self.historique_poissons.append(nb_poissons)
+        self.historique_requins.append(nb_requins)
 
+        if self.min_poisson is None or nb_poissons < self.min_poisson:
+            self.min_poisson = nb_poissons
+        if self.max_poisson is None or nb_poissons > self.max_poisson:
+            self.max_poisson = nb_poissons
+
+        if self.min_requin is None or nb_requins < self.min_requin:
+            self.min_requin = nb_requins
+        if self.max_requin is None or nb_requins > self.max_requin:
+            self.max_requin = nb_requins
 
 
 
@@ -346,6 +361,7 @@ class Mer:
         
         return dx + dy
     
+#region knn poisson
     def KNN_poisson(self, poisson: Poisson, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Requin]]:
         liste_distances = []
         
@@ -360,34 +376,6 @@ class Mer:
         
         liste_distances.sort(key=lambda x: x[0])
         return liste_distances[:k] if liste_distances else []
-
-    #region distance manhattan
-    def distance_manhattan(self, x1: int, y1: int, x2: int, y2: int) -> int:
-        """
-        Calcule la distance de Manhattan sur un monde toroïdal.
-        Prend le chemin le plus court (en contournant les bords si nécessaire).
-        
-        Args:
-            x1, y1: Coordonnées du premier point
-            x2, y2: Coordonnées du deuxième point
-            
-        Returns:
-            La distance de Manhattan minimale entre les deux points
-        """
-        # Calcule la distance en x en tenant compte du monde circulaire
-        dx = min(
-            abs(x2 - x1), 
-            self.grille.longueur - abs(x2 - x1)
-        )
-        
-        # Calcule la distance en y en tenant compte du monde circulaire
-        dy = min(
-            abs(y2 - y1), 
-            self.grille.largeur - abs(y2 - y1)
-        )
-        
-        return dx + dy
-
 
 #region statistiques console
     # Comptage statistique sur console
@@ -525,7 +513,7 @@ def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
     text_poissons_max = f"Poissons max: {mer.max_poisson}"
     text_poissons_min = f"Poissons min: {mer.min_poisson}"
     text_requins_max = f"Requins max: {mer.max_requin}"
-    text_requins_min = f"Requins min: {mer.min_poisson}"
+    text_requins_min = f"Requins min: {mer.min_requin}"
 
     # Couleur text dynamique
     if poissons > requins:
