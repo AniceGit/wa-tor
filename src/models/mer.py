@@ -25,10 +25,10 @@ class Mer:
 
         # self.min_requin = self.grille.largeur * self.grille.longueur 
         # self.max_requin = -1
-        self.min_poisson = None
-        self.max_poisson = None
-        self.min_requin = None
-        self.max_requin = None
+        self.min_poisson = grille.largeur * grille.longueur
+        self.max_poisson = -1
+        self.min_requin = grille.largeur * grille.longueur
+        self.max_requin = -1
 #region Ajouts poissons
     # Fonction d'ajout d'un poisson à la grille
     def ajout_poisson(self, un_poisson: Poisson):
@@ -306,14 +306,18 @@ class Mer:
         self.historique_poissons.append(nb_poissons)
         self.historique_requins.append(nb_requins)
 
-        if self.min_poisson is None or nb_poissons < self.min_poisson:
+        # if self.min_poisson is None or nb_poissons < self.min_poisson:
+        if nb_poissons < self.min_poisson:
             self.min_poisson = nb_poissons
-        if self.max_poisson is None or nb_poissons > self.max_poisson:
+        # if self.max_poisson is None or nb_poissons > self.max_poisson:
+        if nb_poissons > self.max_poisson:
             self.max_poisson = nb_poissons
 
-        if self.min_requin is None or nb_requins < self.min_requin:
+        # if self.min_requin is None or nb_requins < self.min_requin:
+        if  nb_requins < self.min_requin:
             self.min_requin = nb_requins
-        if self.max_requin is None or nb_requins > self.max_requin:
+        # if self.max_requin is None or nb_requins > self.max_requin:
+        if nb_requins > self.max_requin:
             self.max_requin = nb_requins
 
 
