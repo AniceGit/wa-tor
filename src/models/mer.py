@@ -234,6 +234,7 @@ class Mer:
                     dy = 1 if dy>0 else -1 if dy<0 else 0
 
                     # On vérifie d'abord si on peut manger une cible adjacente (non diagonale)
+                    # sinon les requins peuvent manger en diagonale !
                     if (dx == 0 and abs(dy) == 1) or (dy == 0 and abs(dx) == 1):
                         nx, ny = (x+dx) % self.grille.longueur, (y+dy) % self.grille.largeur
                         if (nx, ny) == (cible.abscisse, cible.ordonnee):
