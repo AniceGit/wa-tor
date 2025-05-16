@@ -1,5 +1,9 @@
 {
     "python.analysis.extraPaths": [
         "./src/models"
+    ],
+    "cSpell.enabledLanguageIds": [
+        "COBOL",
+        "ACUCOBOL"
     ]
 }

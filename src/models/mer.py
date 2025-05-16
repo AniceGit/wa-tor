@@ -37,10 +37,10 @@ class Mer:
         self.liste_requins: List[Requin] = []
         self.liste_rochers: List[Rocher] = []
         self.liste_creatures: List[Poisson, Requin] = []
-        # self.min_poisson = self.grille.largeur * self.grille.longueur 
-        # self.max_poisson = -1       
+        # self.min_poisson = self.grille.largeur * self.grille.longueur
+        # self.max_poisson = -1
 
-        # self.min_requin = self.grille.largeur * self.grille.longueur 
+        # self.min_requin = self.grille.largeur * self.grille.longueur
         # self.max_requin = -1
         self.min_poisson = grille.largeur * grille.longueur
         self.max_poisson = -1
@@ -97,7 +97,7 @@ class Mer:
             self.grille.tableau[x][y] = rocher
             self.liste_rochers.append(rocher)
 
-        
+
 
 
 #region deplacer tous basique
@@ -206,7 +206,7 @@ class Mer:
         liste_creatures.extend(self.liste_requins)
         random.shuffle(liste_creatures)
 
-         
+
         for creature in liste_creatures[:]:   # copie pour éviter itération sur liste modifiée
             if not creature.est_vivant:
                 continue
@@ -327,7 +327,7 @@ class Mer:
                     self.grille.tableau[bx][by] = coordonnee_parent
 
         # fin de boucle : on ajoute les nouveau-nés et on supprime les morts
-        
+
         # self.liste_poissons = [p for p in self.liste_poissons if p.est_vivant]
         # self.liste_poissons.extend(liste_nouveaux_nes_poissons)
 # Mise à jour des listes principales (suppression des morts)
@@ -374,16 +374,16 @@ class Mer:
             List[Tuple[float, Poisson]]: Liste des tuples (distance, poisson).
         """
         liste_distances = []
-        
+
         for poisson in self.liste_poissons:  # Chercher parmi les poissons
             if poisson.est_vivant:
                 dist = self.distance_manhattan(
-                    requin.abscisse, requin.ordonnee, 
+                    requin.abscisse, requin.ordonnee,
                     poisson.abscisse, poisson.ordonnee
                 )
                 if dist <= champ_de_vision:
                     liste_distances.append((dist, poisson))
-        
+
         liste_distances.sort(key=lambda x: x[0])
         return liste_distances[:k] if liste_distances else []
 
@@ -392,28 +392,28 @@ class Mer:
         """
         Calcule la distance de Manhattan sur un monde toroïdal.
         Prend le chemin le plus court (en contournant les bords si nécessaire).
-        
+
         Args:
             x1, y1: Coordonnées du premier point
             x2, y2: Coordonnées du deuxième point
-            
+
         Returns:
             La distance de Manhattan minimale entre les deux points
         """
         # Calcule la distance en x en tenant compte du monde circulaire
         dx = min(
-            abs(x2 - x1), 
+            abs(x2 - x1),
             self.grille.longueur - abs(x2 - x1)
         )
-        
+
         # Calcule la distance en y en tenant compte du monde circulaire
         dy = min(
-            abs(y2 - y1), 
+            abs(y2 - y1),
             self.grille.largeur - abs(y2 - y1)
         )
-        
+
         return dx + dy
-    
+
 #region knn poisson
     def KNN_poisson(self, poisson: Poisson, k: int = 1, champ_de_vision: int = 3) -> List[Tuple[float, Requin]]:
         """
@@ -428,16 +428,16 @@ class Mer:
             List[Tuple[float, Requin]]: Liste des tuples (distance, requin).
         """
         liste_distances = []
-        
+
         for requin in self.liste_requins:  # Chercher parmi les requins, pas les poissons
             if requin.est_vivant:
                 dist = self.distance_manhattan(
-                    requin.abscisse, requin.ordonnee, 
+                    requin.abscisse, requin.ordonnee,
                     poisson.abscisse, poisson.ordonnee
                 )
                 if dist <= champ_de_vision:
                     liste_distances.append((dist, requin))
-        
+
         liste_distances.sort(key=lambda x: x[0])
         return liste_distances[:k] if liste_distances else []
 
@@ -639,7 +639,7 @@ def afficher_stats_pygame(mer:Mer, poissons, requins, rochers, ecran, tour):
     else:
         texte_poissons_surface = font.render(texte_poissons, True, color_text_black)
         texte_requins_surface = font.render(texte_requins, True, color_text_black)
-    
+
     texte_tour_surface = font.render(texte_tour, True, color_text_black)
     texte_rochers_surface = font.render(texte_rochers, True, color_text_brown)
     texte_poissons_max_surface = font.render(text_poissons_max, True, color_text_vert_fluo)
@@ -715,9 +715,9 @@ def afficher_graphiques(surface, historique_poissons, historique_requins, largeu
 # from requin import Requin
 # from rocher import Rocher
 # from utils import afficher_stats_pygame, ajouter_effet_crt
-h0 = 200
+h0 = 120
 def creer_fenetre(largeur, hauteur, h=h0):
-    
+
     pygame.init()
     fenetre_principale = pygame.display.set_mode((largeur, hauteur))
     ecran = pygame.Surface((largeur, hauteur - h))
@@ -778,7 +778,7 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
 
     bouton_poisson = pygame.image.load("assets/poisson-clown.png")
     bouton_poisson = pygame.transform.scale(bouton_poisson, (2*cell_taille, 2*cell_taille))
-    
+
     bouton_requin = pygame.image.load("assets/requin-cool.png")
     bouton_requin = pygame.transform.scale(bouton_requin, (2*cell_taille, 2*cell_taille))
 
@@ -799,25 +799,25 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
 
     # Élément actuellement sélectionné (eau, poisson, requin, rocher)
     element_selectionne = 'eau'
-    
+
     # Variable pour stocker la pause
     pause = False
-    
+
     while running and tour < iterations:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 souris_pos = event.pos  # position du clic
-                
+
                 # Si clic dans la zone des boutons (en haut)
                 if souris_pos[1] < h:
                     # Obtenir les rectangles des boutons mis à jour
-                    boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font, 
-                                                              bouton_eau, bouton_poisson, 
-                                                              bouton_requin, bouton_rocher, 
+                    boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font,
+                                                              bouton_eau, bouton_poisson,
+                                                              bouton_requin, bouton_rocher,
                                                               2*cell_taille)
-                    
+
                     # Vérifier quel bouton a été cliqué
                     if boutons_rects['eau'].collidepoint(souris_pos):
                         element_selectionne = 'eau'
@@ -836,15 +836,15 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                     x_souris, y_souris = souris_pos
                     case_x = x_souris // cell_taille
                     case_y = (y_souris - h) // cell_taille  # - h car ta zone simulation est en dessous des boutons
-                    
+
                     if 0 <= case_x < longueur and 0 <= case_y < largeur:
                         print(f"Case cliquée : ({case_x}, {case_y})")
 
                         contenu = ma_mer.grille.tableau[case_y][case_x]
 
-                    
-                
-                        
+
+
+
                         # Placer l'élément sélectionné
                         if element_selectionne == 'eau':
                             if isinstance(contenu, Requin):
@@ -857,9 +857,9 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                                 # ma_mer.liste_creatures.remove(contenu)
                                 # ma_mer.liste_poissons.remove(contenu)
                             elif isinstance(contenu, Rocher):
-                                ma_mer.liste_rochers.remove(contenu)                        
+                                ma_mer.liste_rochers.remove(contenu)
                             ma_mer.grille.tableau[case_y][case_x] = None
-                         
+
                         elif element_selectionne == 'poisson':
                             nouveau_poisson = Poisson(case_y, case_x)
                             if contenu == None:
@@ -873,9 +873,9 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                                 ma_mer.grille.tableau[case_y][case_x] = nouveau_poisson
                             elif isinstance(contenu, Rocher):
                                 ma_mer.liste_rochers.remove(contenu)
-                                ma_mer.liste_poissons.append(nouveau_poisson)                        
+                                ma_mer.liste_poissons.append(nouveau_poisson)
                                 ma_mer.grille.tableau[case_y][case_x] = nouveau_poisson
-                            
+
                         elif element_selectionne == 'requin':
                             nouveau_requin = Requin(case_y, case_x)
                             if contenu == None:
@@ -888,7 +888,7 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                                 ma_mer.grille.tableau[case_y][case_x] = nouveau_requin
                                 ma_mer.liste_requins.append(nouveau_requin)
                             elif isinstance(contenu, Rocher):
-                                ma_mer.liste_rochers.remove(contenu) 
+                                ma_mer.liste_rochers.remove(contenu)
                                 ma_mer.grille.tableau[case_y][case_x] = nouveau_requin
                                 ma_mer.liste_requins.append(nouveau_requin)
                         elif element_selectionne == 'rocher':
@@ -903,8 +903,8 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                             nouveau_rocher = Rocher(case_x, case_y)
                             ma_mer.grille.tableau[case_y][case_x] = nouveau_rocher
                             ma_mer.liste_rochers.append(nouveau_rocher)
-            
-            # Ajout de la touche pour mettre en pause            
+
+            # Ajout de la touche pour mettre en pause
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     pause = not pause
@@ -932,15 +932,15 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
         afficher_stats_pygame(ma_mer, nb_poisson, nb_requin, nb_rochers, ecran, tour)
 
         ajouter_effet_crt(ecran)
-        
+
         # Déplacer les éléments seulement si la simulation n'est pas en pause
         if not pause:
             ma_mer.deplacer_tous()
 
         # Affiche l'interface dans la surface_exterieure
-        boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font, 
-                                                  bouton_eau, bouton_poisson, 
-                                                  bouton_requin, bouton_rocher, 
+        boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font,
+                                                  bouton_eau, bouton_poisson,
+                                                  bouton_requin, bouton_rocher,
                                                   2*cell_taille)
 
         # Dessiner un cadre plus épais autour du bouton sélectionné
@@ -956,10 +956,10 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
         # Affiche les deux surfaces dans la fenêtre principale
         f_principale.blit(ecran, (0, h))
         f_principale.blit(s_exterieure, (0, 0))
-        
+
         pygame.display.flip()
         clock.tick(10)
-        
+
         if not pause:
             tour += 1
 
