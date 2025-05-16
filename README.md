@@ -6,7 +6,7 @@ Le but est de modéliser l’interaction entre des poissons, des requins, et des
 ---
 
 ## 📁 Structure du projet
-
+```
 Wa-tor/
 ├── assets/ # Ressources graphiques (sprites, polices)
 ├── src/
@@ -20,7 +20,7 @@ Wa-tor/
 └── requirements.txt
 └── .gitignore
 └── LICENCE
-
+```
 
 ---
 
