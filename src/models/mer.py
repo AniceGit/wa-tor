@@ -716,10 +716,12 @@ def creer_fenetre(largeur, hauteur, h=h0):
     surface_exterieure = pygame.Surface((largeur, h))
     return fenetre_principale, ecran, surface_exterieure
 
-def remplir_surface_exterieure(surface, label_texte, font, image_bouton_eau, image_bouton_poisson, image_bouton_requin, image_bouton_rocher, n):
+def remplir_surface_exterieure(surface, label_texte, label_text_etat_simulation, font, image_bouton_eau, image_bouton_poisson, image_bouton_requin, image_bouton_rocher, n):
     surface.fill((30, 30, 30))  # fond sombre pour distinguer
     texte_surface = font.render(label_texte, True, (255, 255, 255))
+    texte_surface_etat_simulation = font.render(label_text_etat_simulation, True, (255, 255, 255))
     surface.blit(texte_surface, (10, 10))
+    surface.blit(texte_surface_etat_simulation, (300, 10))
 
     # Affiche les boutons sur la surface extérieure
     surface.blit(image_bouton_eau, (30, 30))
@@ -762,7 +764,8 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
     font = pygame.font.Font("assets/press-start-2p/PressStart2P.ttf", 12)
 
     # Texte initial
-    label_texte = "Contrôle Simulation **"
+    label_texte = "Aucun item sélectionné"
+    label_texte_etat_simulation = "Simulation en cours"
 
     # Chargement des images
     bouton_eau = pygame.image.load("assets/eau.png").convert_alpha()
@@ -805,7 +808,7 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                 # Si clic dans la zone des boutons (en haut)
                 if souris_pos[1] < h:
                     # Obtenir les rectangles des boutons mis à jour
-                    boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font,
+                    boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte,label_texte_etat_simulation, font,
                                                               bouton_eau, bouton_poisson,
                                                               bouton_requin, bouton_rocher,
                                                               2*cell_taille)
@@ -901,9 +904,9 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
                 if event.key == pygame.K_SPACE:
                     pause = not pause
                     if pause:
-                        label_texte = "Simulation en pause"
+                        label_texte_etat_simulation = "Simulation en pause"
                     else:
-                        label_texte = "Simulation en cours"
+                        label_texte_etat_simulation = "Simulation en cours"
 
         # Affichage de la grille
         ecran.fill("#b3d8f4")
@@ -930,7 +933,7 @@ def start_pygame(iterations=2000, intervalle=0.8, h=h0):
             ma_mer.deplacer_tous()
 
         # Affiche l'interface dans la surface_exterieure
-        boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font,
+        boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte,label_texte_etat_simulation, font,
                                                   bouton_eau, bouton_poisson,
                                                   bouton_requin, bouton_rocher,
                                                   2*cell_taille)
