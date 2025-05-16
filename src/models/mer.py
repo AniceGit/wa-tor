@@ -707,7 +707,7 @@ def afficher_graphiques(surface, historique_poissons, historique_requins, largeu
 # from requin import Requin
 # from rocher import Rocher
 # from utils import afficher_stats_pygame, ajouter_effet_crt
-h0 = 200
+h0 = 120
 def creer_fenetre(largeur, hauteur, h=h0):
 
     pygame.init()
