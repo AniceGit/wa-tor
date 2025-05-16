@@ -706,36 +706,85 @@ def afficher_graphiques(surface, historique_poissons, historique_requins, largeu
         pygame.draw.line(surface, (0,255,26), (x1, y1_p), (x2, y2_p), 2)  # Poissons en vert
         pygame.draw.line(surface, (0,0,128), (x1, y1_r), (x2, y2_r), 2)  # Requins en bleu
 
-
-#region start pygame
-def start_pygame(iterations=2000, intervalle=0.8):
-    """
-    Lance la simulation de l'écosystème Wa-Tor avec l'interface graphique Pygame.
-
-    Arguments:
-        iterations (int): Le nombre de tours à simuler. Par défaut, 2000 tours.
-        intervalle (float): Le temps d'attente entre chaque tour en secondes. Par défaut, 0.8 secondes.
-    """
-    # pygame setup
-    pygame.init()
+#R
+#region fenetre principale
+# import pygame
+# from mer import Mer
+# from grille import Grille
+# from poisson import Poisson
+# from requin import Requin
+# from rocher import Rocher
+# from utils import afficher_stats_pygame, ajouter_effet_crt
+h0 = 200
+def creer_fenetre(largeur, hauteur, h=h0):
     
+    pygame.init()
+    fenetre_principale = pygame.display.set_mode((largeur, hauteur))
+    ecran = pygame.Surface((largeur, hauteur - h))
+    surface_exterieure = pygame.Surface((largeur, h))
+    return fenetre_principale, ecran, surface_exterieure
+
+def remplir_surface_exterieure(surface, label_texte, font, image_bouton_eau, image_bouton_poisson, image_bouton_requin, image_bouton_rocher, n):
+    surface.fill((30, 30, 30))  # fond sombre pour distinguer
+    texte_surface = font.render(label_texte, True, (255, 255, 255))
+    surface.blit(texte_surface, (10, 10))
+
+    # Affiche les boutons sur la surface extérieure
+    surface.blit(image_bouton_eau, (30, 30))
+    surface.blit(image_bouton_poisson, (30, 30 + n))
+    surface.blit(image_bouton_requin, (30 + n, 30 + n))
+    surface.blit(image_bouton_rocher, (30 + n, 30))
+
+    # Optionnel : cadre blanc autour des boutons sélectionnés
+    pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(30, 30, n, n), 1)
+    pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(30, 30 + n, n, n), 1)
+    pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(30 + n, 30, n, n), 1)
+    pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(30 + n, 30 + n, n, n), 1)
+
+    return {
+        'eau': pygame.Rect(30, 30, n, n),
+        'poisson': pygame.Rect(30, 30 + n, n, n),
+        'rocher': pygame.Rect(30 + n, 30, n, n),
+        'requin': pygame.Rect(30 + n, 30 + n, n, n)
+    }
+
+def start_pygame(iterations=2000, intervalle=0.8, h=h0):
+    pygame.init()
+
     longueur = 80
     largeur = 40
     cell_taille = 20
-    ecran = pygame.display.set_mode((longueur * cell_taille, largeur * cell_taille))
+    f_principale, ecran, s_exterieure = creer_fenetre(longueur * cell_taille, largeur * cell_taille + h)
+
     pygame.display.set_caption("Simulation Wa-Tor")
 
-    # initialisation de la mer
     ma_grille = Grille(longueur, largeur)
     ma_mer = Mer(ma_grille)
     ma_mer.ajout_poissons_requin_rochers_dans_liste(1000, 200)
-
 
     clock = pygame.time.Clock()
     running = True
     tour = 0
 
-    # On charge les images et on les redimensionne
+    # Charger police
+    font = pygame.font.Font("assets/press-start-2p/PressStart2P.ttf", 12)
+
+    # Texte initial
+    label_texte = "Contrôle Simulation **"
+
+    # Chargement des images
+    bouton_eau = pygame.image.load("assets/eau.png").convert_alpha()
+    bouton_eau = pygame.transform.scale(bouton_eau, (2*cell_taille, 2*cell_taille))
+
+    bouton_poisson = pygame.image.load("assets/poisson-clown.png")
+    bouton_poisson = pygame.transform.scale(bouton_poisson, (2*cell_taille, 2*cell_taille))
+    
+    bouton_requin = pygame.image.load("assets/requin-cool.png")
+    bouton_requin = pygame.transform.scale(bouton_requin, (2*cell_taille, 2*cell_taille))
+
+    bouton_rocher = pygame.image.load("assets/rocher-pointu.png")
+    bouton_rocher = pygame.transform.scale(bouton_rocher, (2*cell_taille, 2*cell_taille))
+
     img_eau = pygame.image.load("assets/eau.png")
     img_eau = pygame.transform.scale(img_eau, (cell_taille, cell_taille))
 
@@ -748,17 +797,125 @@ def start_pygame(iterations=2000, intervalle=0.8):
     img_rocher = pygame.image.load("assets/rocher-pointu.png")
     img_rocher = pygame.transform.scale(img_rocher, (cell_taille, cell_taille))
 
+    # Élément actuellement sélectionné (eau, poisson, requin, rocher)
+    element_selectionne = 'eau'
+    
+    # Variable pour stocker la pause
+    pause = False
+    
     while running and tour < iterations:
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                souris_pos = event.pos  # position du clic
+                
+                # Si clic dans la zone des boutons (en haut)
+                if souris_pos[1] < h:
+                    # Obtenir les rectangles des boutons mis à jour
+                    boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font, 
+                                                              bouton_eau, bouton_poisson, 
+                                                              bouton_requin, bouton_rocher, 
+                                                              2*cell_taille)
+                    
+                    # Vérifier quel bouton a été cliqué
+                    if boutons_rects['eau'].collidepoint(souris_pos):
+                        element_selectionne = 'eau'
+                        label_texte = "Eau sélectionnée"
+                    elif boutons_rects['poisson'].collidepoint(souris_pos):
+                        element_selectionne = 'poisson'
+                        label_texte = "Poisson sélectionné"
+                    elif boutons_rects['requin'].collidepoint(souris_pos):
+                        element_selectionne = 'requin'
+                        label_texte = "Requin sélectionné"
+                    elif boutons_rects['rocher'].collidepoint(souris_pos):
+                        element_selectionne = 'rocher'
+                        label_texte = "Rocher sélectionné"
+                else:
+                    # Clic dans la zone simulation : calcul des coordonnées de la case
+                    x_souris, y_souris = souris_pos
+                    case_x = x_souris // cell_taille
+                    case_y = (y_souris - h) // cell_taille  # - h car ta zone simulation est en dessous des boutons
+                    
+                    if 0 <= case_x < longueur and 0 <= case_y < largeur:
+                        print(f"Case cliquée : ({case_x}, {case_y})")
 
-        # fill the screen with a color to wipe away anything from last frame
+                        contenu = ma_mer.grille.tableau[case_y][case_x]
+
+                    
+                
+                        
+                        # Placer l'élément sélectionné
+                        if element_selectionne == 'eau':
+                            if isinstance(contenu, Requin):
+                                contenu.est_vivant = False
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_requins.remove(contenu)
+                            if isinstance(contenu, Poisson):
+                                contenu.est_vivant = False
+                                # if contenu in ma_mer.liste_poissons:
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_poissons.remove(contenu)
+                            elif isinstance(contenu, Rocher):
+                                ma_mer.liste_rochers.remove(contenu)                        
+                            ma_mer.grille.tableau[case_y][case_x] = None
+                         
+                        elif element_selectionne == 'poisson':
+                            nouveau_poisson = Poisson(case_y, case_x)
+                            if contenu == None:
+                                ma_mer.liste_poissons.append(nouveau_poisson)
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_poisson
+                            if isinstance(contenu, Requin):
+                                contenu.est_vivant = False
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_requins.remove(contenu)
+                                ma_mer.liste_poissons.append(nouveau_poisson)
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_poisson
+                            elif isinstance(contenu, Rocher):
+                                ma_mer.liste_rochers.remove(contenu)
+                                ma_mer.liste_poissons.append(nouveau_poisson)                        
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_poisson
+                            
+                        elif element_selectionne == 'requin':
+                            nouveau_requin = Requin(case_y, case_x)
+                            if contenu == None:
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_requin
+                                ma_mer.liste_requins.append(nouveau_requin)
+                            if isinstance(contenu, Poisson) and not isinstance(contenu, Requin):
+                                contenu.est_vivant = False
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_poissons.remove(contenu)
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_requin
+                                ma_mer.liste_requins.append(nouveau_requin)
+                            elif isinstance(contenu, Rocher):
+                                ma_mer.liste_rochers.remove(contenu) 
+                                ma_mer.grille.tableau[case_y][case_x] = nouveau_requin
+                                ma_mer.liste_requins.append(nouveau_requin)
+                        elif element_selectionne == 'rocher':
+                            if isinstance(contenu, Requin):
+                                contenu.est_vivant = False
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_requins.remove(contenu)
+                            if isinstance(contenu, Poisson):
+                                contenu.est_vivant = False
+                                # ma_mer.liste_creatures.remove(contenu)
+                                # ma_mer.liste_poissons.remove(contenu)
+                            nouveau_rocher = Rocher(case_x, case_y)
+                            ma_mer.grille.tableau[case_y][case_x] = nouveau_rocher
+                            ma_mer.liste_rochers.append(nouveau_rocher)
+            
+            # Ajout de la touche pour mettre en pause            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    pause = not pause
+                    if pause:
+                        label_texte = "Simulation en pause"
+                    else:
+                        label_texte = "Simulation en cours"
+
+        # Affichage de la grille
         ecran.fill("#b3d8f4")
 
-        # RENDER YOUR GAME HERE
         for i in range(longueur):
             for j in range(largeur):
                 ecran.blit(img_eau, (i * cell_taille, j * cell_taille))
@@ -770,37 +927,51 @@ def start_pygame(iterations=2000, intervalle=0.8):
                 elif isinstance(case, Rocher):
                     ecran.blit(img_rocher, (i * cell_taille, j * cell_taille))
 
-        # Calcul des statistiques et affichage
         nb_poisson, nb_requin = ma_mer.compter_etats_pygame()
         nb_rochers = len(ma_mer.liste_rochers)
         afficher_stats_pygame(ma_mer, nb_poisson, nb_requin, nb_rochers, ecran, tour)
 
-        # Style retro
-        #ajouter_scanlines(ecran)
         ajouter_effet_crt(ecran)
-
-        # On déplace les poissons et requins
-        ma_mer.deplacer_tous()
         
-        # flip() the display to put your work on screen
+        # Déplacer les éléments seulement si la simulation n'est pas en pause
+        if not pause:
+            ma_mer.deplacer_tous()
+
+        # Affiche l'interface dans la surface_exterieure
+        boutons_rects = remplir_surface_exterieure(s_exterieure, label_texte, font, 
+                                                  bouton_eau, bouton_poisson, 
+                                                  bouton_requin, bouton_rocher, 
+                                                  2*cell_taille)
+
+        # Dessiner un cadre plus épais autour du bouton sélectionné
+        if element_selectionne == 'eau':
+            pygame.draw.rect(s_exterieure, (255, 255, 0), boutons_rects['eau'], 3)
+        elif element_selectionne == 'poisson':
+            pygame.draw.rect(s_exterieure, (255, 255, 0), boutons_rects['poisson'], 3)
+        elif element_selectionne == 'requin':
+            pygame.draw.rect(s_exterieure, (255, 255, 0), boutons_rects['requin'], 3)
+        elif element_selectionne == 'rocher':
+            pygame.draw.rect(s_exterieure, (255, 255, 0), boutons_rects['rocher'], 3)
+
+        # Affiche les deux surfaces dans la fenêtre principale
+        f_principale.blit(ecran, (0, h))
+        f_principale.blit(s_exterieure, (0, 0))
+        
         pygame.display.flip()
+        clock.tick(10)
+        
+        if not pause:
+            tour += 1
 
-        clock.tick(10)  # limits FPS to 10
-        tour += 1
-
-        #Stopper boucle quand une population s'eteint
-        if nb_poisson == 0 or nb_requin == 0 :
-            if nb_poisson == 0 :
-                perdant = f"Poissons"
+        if nb_poisson == 0 or nb_requin == 0:
+            if nb_poisson == 0:
+                perdant = "Poissons"
                 img = pygame.image.load("assets/poisson-clown.png")
-                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
             else:
-                perdant = f"Requins"
+                perdant = "Requins"
                 img = pygame.image.load("assets/requin-cool.png")
-                img = pygame.transform.scale(img, (cell_taille*10, cell_taille*10))
-            ecran.fill((0, 0, 0))  # écran fond noir
-
-            # Affiche un message à l'écran
+            img = pygame.transform.scale(img, (cell_taille * 10, cell_taille * 10))
+            ecran.fill((0, 0, 0))
             font_path = "assets/press-start-2p/PressStart2P.ttf"
             font = pygame.font.Font(font_path, 18)
             message = f"Extinction des {perdant}! (Tours : {tour})"
@@ -809,15 +980,13 @@ def start_pygame(iterations=2000, intervalle=0.8):
             img_rect = img.get_rect(center=(ecran.get_width() // 2, text_rect.bottom + img.get_height() // 2 + 10))
             ecran.blit(text, text_rect)
             ecran.blit(img, img_rect)
+
+            f_principale.blit(ecran, (0, h))
             pygame.display.flip()
-            
-            # Maintient l'écran quelques secondes
             pygame.time.wait(3000)
             running = False
 
-
     pygame.quit()
 
-
 if __name__ == "__main__":
-    start()
+    start_pygame()
